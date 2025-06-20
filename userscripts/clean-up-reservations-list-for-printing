@@ -9,7 +9,6 @@
     display: none;
     }
 
-
     /* make the alert text for problem items show up on the page? */
         .badge-danger::after {
           content: attr(data-original-title);
@@ -31,6 +30,16 @@
             font-weight: normal;
             display: inline-block;
             max-width: 300px;
+        }
+
+    /* style the date if it's an unfulfilled order whose original date has passed */ 
+        .unfulfilled-reservation-date { 
+            color: #F3565D !important;
+        }
+        .unfulfilled-reservation-date::after { 
+            content: " Order not picked up"; 
+            color: #F3565D; 
+            display: block; 
         }
 
 /* end always-present styles */ 
@@ -113,5 +122,15 @@
       font-size: 25px !important;
       font-weight: bold; 
       }
+    
+    /* style the date if it's an unfulfilled order whose original date has passed */ 
+        .unfulfilled-reservation-date { 
+            color: #F3565D !important; 
+        }
+        .unfulfilled-reservation-date::after { 
+            content: " Order not picked up"; 
+            color: #F3565D !important; 
+            display: block;
+        }
 
 }  /* end print styles */
