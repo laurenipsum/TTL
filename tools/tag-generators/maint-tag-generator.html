@@ -259,21 +259,58 @@
             const lines = csvData.split('\n').filter(line => line.trim());
             if (lines.length < 2) return [];
 
-            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
             const rows = [];
 
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
-                const row = {};
+            // Parse each line properly handling quoted fields
+            for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+                const line = lines[lineIndex];
+                const values = [];
+                let currentValue = '';
+                let insideQuotes = false;
+                let i = 0;
+
+                while (i < line.length) {
+                    const char = line[i];
+                    
+                    if (char === '"') {
+                        if (insideQuotes && line[i + 1] === '"') {
+                            // Double quote - add single quote to value
+                            currentValue += '"';
+                            i += 2;
+                        } else {
+                            // Start or end of quoted field
+                            insideQuotes = !insideQuotes;
+                            i++;
+                        }
+                    } else if (char === ',' && !insideQuotes) {
+                        // Field separator
+                        values.push(currentValue);
+                        currentValue = '';
+                        i++;
+                    } else {
+                        // Regular character
+                        currentValue += char;
+                        i++;
+                    }
+                }
                 
-                headers.forEach((header, index) => {
-                    row[header] = values[index] || '';
-                });
+                // Add the last value
+                values.push(currentValue);
                 
-                rows.push(row);
+                if (lineIndex === 0) {
+                    // Store headers
+                    rows.headers = values;
+                } else {
+                    // Create row object
+                    const row = {};
+                    rows.headers.forEach((header, index) => {
+                        row[header] = values[index] || '';
+                    });
+                    rows.push(row);
+                }
             }
 
-            return rows;
+            return rows.slice(1); // Return everything except headers array
         }
 
         function processMaintenanceData(rows) {
