@@ -13,7 +13,466 @@
         }
 
         .upload-section {
+            background: white;<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Maintenance Tag Generator</title>
+    <style>
+        /* ==== APPLICATION INTERFACE STYLES ==== */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .upload-section {
             background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .file-input {
+            margin: 10px 0;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        button {
+            background-color: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #005a87;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .status.error {
+            background-color: #ffe6e6;
+            color: #d00;
+        }
+
+        .status.success {
+            background-color: #e6ffe6;
+            color: #080;
+        }
+
+        /* ==== PRINT STYLES FOR TAGS ==== */
+        @media print {
+            body { 
+                background: white; 
+                margin: 0; 
+            }
+            .upload-section, 
+            .no-print { 
+                display: none !important; 
+            }
+        }
+
+        /* ==== TAG LAYOUT STYLES ==== */
+        .tags-container {
+            display: none; /* Hidden until generated */
+        }
+
+        .page {
+            width: 8.5in;
+            height: 11in;
+            margin: 0 auto 20px auto;
+            padding: 0.25in;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            page-break-after: always;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 0.125in;
+        }
+
+        .page:last-child {
+            page-break-after: avoid;
+        }
+
+        /* ==== INDIVIDUAL TAG STYLES ==== */
+        .tag {
+            border: 2px solid #333;
+            padding: 8px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+            line-height: 2;
+            overflow: visible;
+        }
+
+        /* Tag header with Item ID and Name */
+        .tag-header {
+            border-bottom: 1px solid #666;
+            padding-bottom: 4px;
+            margin-bottom: 6px;
+        }
+
+        .tag-item-id, .tag-name {
+            font-weight: bold;
+            font-size: 14px;
+            color: #000;
+        }
+
+        /* Main tag content */
+        .tag-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .tag-field {
+            display: flex;
+            font-size: inherit;
+        }
+
+        .tag-label {
+            font-weight: bold;
+            color: #444;
+            padding-right: 6px; 
+        }
+
+        .tag-value {
+            color: #000;
+            flex: 1;
+            word-break: break-word;
+        }
+
+        /*make sure any p tags in notes fields don't break things */
+        .tag-value p, .tag-notes p { display: inline; margin: 0; padding: 0; }
+
+        /* Special styling for specific fields */
+        .tag-maintenance-id {
+            background: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+            font-size: inherit;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        .tag-notes {
+            font-size: inherit;
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 1px dotted #999;
+        }
+
+        /* ==== ALTERNATIVE STYLES (commented out - uncomment to use) ==== */
+        /*
+        .tag {
+            border-radius: 4px;
+            background: #fafafa;
+        }
+        
+        .tag-header {
+            background: #e0e0e0;
+            margin: -8px -8px 6px -8px;
+            padding: 6px 8px;
+        }
+        */
+    </style>
+</head>
+<body>
+    <div class="upload-section">
+        <h1>Tool Maintenance Tag Generator</h1>
+        <p>Upload your maintenance export CSV to generate printable tags (4 per page)</p>
+        
+        <div class="file-input">
+            <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" />
+        </div>
+        
+        <button onclick="processFile()">Generate Tags</button>
+        <button onclick="window.print()" id="printBtn" style="display:none;">Print Tags</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <div id="tagsContainer" class="tags-container"></div>
+
+    <script>
+        // Field mapping from your export to display names
+        const fieldMapping = {
+            'Maintenance ID': 'maintenanceId',
+            'Name': 'name', 
+            'Item ID': 'itemId',
+            'Notes': 'notes',
+            'Plan': 'plan',
+            'Location Code': 'locationCode',
+            'Due Back': 'dueBack',
+            'Started': 'started',
+            'Provider': 'provider',
+            'Recorded By': 'recordedBy'
+        };
+
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + (isError ? 'error' : 'success');
+        }
+
+        function processFile() {
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showStatus('Please select a file first.', true);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csvData = e.target.result;
+                    const rows = parseCSV(csvData);
+                    
+                    if (rows.length === 0) {
+                        showStatus('No data found in file.', true);
+                        return;
+                    }
+
+                    const processedData = processMaintenanceData(rows);
+                    generateTags(processedData);
+                    
+                    showStatus(`Successfully generated tags for ${processedData.length} items.`);
+                    document.getElementById('printBtn').style.display = 'inline-block';
+                    
+                } catch (error) {
+                    showStatus('Error processing file: ' + error.message, true);
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function parseCSV(csvData) {
+            if (!csvData || csvData.trim().length === 0) return [];
+
+            const rows = [];
+            let headers = [];
+            let currentRow = [];
+            let currentField = '';
+            let insideQuotes = false;
+            let rowIndex = 0;
+            
+            // Parse character by character to handle multi-line quoted fields
+            for (let i = 0; i < csvData.length; i++) {
+                const char = csvData[i];
+                const nextChar = i + 1 < csvData.length ? csvData[i + 1] : null;
+                
+                if (char === '"') {
+                    if (insideQuotes && nextChar === '"') {
+                        // Double quote - add single quote to field
+                        currentField += '"';
+                        i++; // Skip the next quote
+                    } else {
+                        // Start or end of quoted field
+                        insideQuotes = !insideQuotes;
+                    }
+                } else if (char === ',' && !insideQuotes) {
+                    // Field separator - end current field
+                    currentRow.push(currentField);
+                    currentField = '';
+                } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+                    // End of row (only if not inside quotes)
+                    if (char === '\r' && nextChar === '\n') {
+                        i++; // Skip the \n in \r\n
+                    }
+                    
+                    // Add the final field and complete the row
+                    currentRow.push(currentField);
+                    currentField = '';
+                    
+                    // Process the completed row
+                    if (currentRow.some(field => field.trim())) { // Skip empty rows
+                        if (rowIndex === 0) {
+                            // First row is headers
+                            headers = currentRow;
+                        } else {
+                            // Create row object
+                            const row = {};
+                            headers.forEach((header, index) => {
+                                row[header] = currentRow[index] || '';
+                            });
+                            rows.push(row);
+                        }
+                        rowIndex++;
+                    }
+                    
+                    // Reset for next row
+                    currentRow = [];
+                } else {
+                    // Regular character (including \n inside quotes)
+                    currentField += char;
+                }
+            }
+            
+            // Handle the final row if file doesn't end with newline
+            if (currentField || currentRow.length > 0) {
+                currentRow.push(currentField);
+                if (currentRow.some(field => field.trim())) {
+                    if (rowIndex === 0) {
+                        headers = currentRow;
+                    } else {
+                        const row = {};
+                        headers.forEach((header, index) => {
+                            row[header] = currentRow[index] || '';
+                        });
+                        rows.push(row);
+                    }
+                }
+            }
+
+            return rows;
+        }
+
+        function processMaintenanceData(rows) {
+            // Extract and clean the data
+            const processedRows = rows.map(row => {
+                const processed = {};
+                
+                Object.keys(fieldMapping).forEach(displayField => {
+                    const dataField = fieldMapping[displayField];
+                    processed[dataField] = row[displayField] || '';
+                });
+                
+                return processed;
+            }).filter(row => row.maintenanceId); // Only include rows with maintenance ID
+
+            // Sort by Maintenance ID (largest to smallest)
+            processedRows.sort((a, b) => {
+                const aId = parseInt(a.maintenanceId) || 0;
+                const bId = parseInt(b.maintenanceId) || 0;
+                return bId - aId;
+            });
+
+            return processedRows;
+        }
+
+        function generateTags(data) {
+            const container = document.getElementById('tagsContainer');
+            container.innerHTML = '';
+            
+            // Create pages with 4 tags each
+            for (let i = 0; i < data.length; i += 4) {
+                const page = document.createElement('div');
+                page.className = 'page';
+                
+                // Add up to 4 tags per page
+                for (let j = 0; j < 4 && (i + j) < data.length; j++) {
+                    const item = data[i + j];
+                    const tag = createTag(item);
+                    page.appendChild(tag);
+                }
+                
+                container.appendChild(page);
+            }
+            
+            container.style.display = 'block';
+        }
+
+        function createTag(item) {
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            
+            tag.innerHTML = `
+                <div class="tag-header">
+                    <div class="tag-item-id">${item.itemId}: ${item.name}</div>
+                    <div class="tag-value">${item.plan}</div>
+                </div>
+                
+                <div class="tag-content">
+                    <div class="tag-field">
+                        <span class="tag-label">Home location: </span>
+                        <span class="tag-value">${item.locationCode}</span>
+                    </div>
+                    
+                    <!-- only show Due Back if there is a value --> 
+                    ${item.dueBack && item.dueBack.trim() ? `
+                    <div class="tag-field">
+                        <span class="tag-label">Due Back: </span>
+                        <span class="tag-value">${item.dueBack}</span>
+                    </div>` : ''} 
+
+                    <!-- only show Maintenance Started if there is a value -->
+                    ${item.started && item.started.trim() ? `
+                    <div class="tag-field">
+                        <span class="tag-label">Maintenance started: </span>
+                        <span class="tag-value">${item.started}</span>
+                    </div>` : '' }
+
+                    <div class="tag-field">
+                        <span class="tag-label">Recorded By: </span>
+                        <span class="tag-value">${item.recordedBy}</span>
+                    </div>
+
+                    <!-- only show Provider notes field if there is a value --> 
+                    ${item.provider && item.provider.trim() ? `
+                    <div class="tag-field">
+                        <span class="tag-label">Provider notes: </span>
+                        <span class="tag-value provider-notes-placeholder"></span>
+                    </div>` : '' }
+                    
+                    ${item.notes ? `<div class="tag-notes">Notes: <span class="notes-placeholder"></span></div>` : ''}
+                </div>
+                
+                <div class="tag-maintenance-id" style="display:none;">Maintenance ID: ${item.maintenanceId}</div>
+            `;
+
+            //Insert the HTML content for notes fields
+            
+            // Provider notes field
+            if (item.provider && item.provider.trim()) { 
+                const providerSpan = tag.querySelector('.provider-notes-placeholder');
+                if (providerSpan) { 
+                    providerSpan.innerHTML = item.provider;
+                }
+            }
+
+            //Notes field
+            if (item.notes) { 
+                console.log('Raw notes data:', item.notes);  // ADD THIS LINE
+                const notesSpan = tag.querySelector('.notes-placeholder');
+                if (notesSpan) { 
+                    notesSpan.innerHTML = item.notes;
+                    console.log('After setting innerHTML:', notesSpan.innerHTML);  // ADD THIS LINE
+                } else {
+                    console.log('Could not find notes placeholder span');  // ADD THIS LINE
+                }
+            }
+            
+        return tag;
+        }
+    </script>
+</body>
+</html>
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
