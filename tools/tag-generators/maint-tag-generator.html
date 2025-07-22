@@ -118,17 +118,10 @@
             margin-bottom: 6px;
         }
 
-        .tag-item-id {
+        .tag-item-id, .tag-name {
             font-weight: bold;
             font-size: 14px;
             color: #000;
-        }
-
-        .tag-name {
-            font-weight: bold;
-            font-size: 12px;
-            color: #333;
-            margin-top: 2px;
         }
 
         /* Main tag content */
@@ -334,17 +327,13 @@
             
             tag.innerHTML = `
                 <div class="tag-header">
-                    <div class="tag-item-id">ID: ${item.itemId}</div>
-                    <div class="tag-name">${item.name}</div>
+                    <div class="tag-item-id">${item.itemId}: ${item.name}</div>
+                    <div class="tag-value">${item.plan}</div>
                 </div>
                 
                 <div class="tag-content">
                     <div class="tag-field">
-                        <span class="tag-label">Plan:</span>
-                        <span class="tag-value">${item.plan}</span>
-                    </div>
-                    <div class="tag-field">
-                        <span class="tag-label">Location:</span>
+                        <span class="tag-label">Home location:</span>
                         <span class="tag-value">${item.locationCode}</span>
                     </div>
                     <div class="tag-field">
