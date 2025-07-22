@@ -149,6 +149,9 @@
             word-break: break-word;
         }
 
+        //make sure any leading p tags don't make the value move down a line 
+        .tag-value p { display: inline; margin: 0; padding: 0; }
+
         /* Special styling for specific fields */
         .tag-maintenance-id {
             background: #f0f0f0;
