@@ -139,8 +139,8 @@
 
         .tag-label {
             font-weight: bold;
-            min-width: 70px;
             color: #444;
+            padding-right: 6px; 
         }
 
         .tag-value {
@@ -372,22 +372,32 @@
                         <span class="tag-label">Home location: </span>
                         <span class="tag-value">${item.locationCode}</span>
                     </div>
+                    
+                    <!-- only show Due Back if there is a value --> 
+                    ${item.dueBack && item.dueBack.trim() ? `
                     <div class="tag-field">
                         <span class="tag-label">Due Back: </span>
                         <span class="tag-value">${item.dueBack}</span>
-                    </div>
+                    </div>` : ''} 
+
+                    <!-- only show Maintenance Started if there is a value -->
+                    ${item.started && item.started.trim() ? `
                     <div class="tag-field">
                         <span class="tag-label">Maintenance started: </span>
                         <span class="tag-value">${item.started}</span>
-                    </div>
+                    </div>` : '' }
+
                     <div class="tag-field">
                         <span class="tag-label">Recorded By: </span>
                         <span class="tag-value">${item.recordedBy}</span>
                     </div>
+
+                    <!-- only show Provider notes field if there is a value --> 
+                    ${item.provider && item.provider.trim() ? `
                     <div class="tag-field">
                         <span class="tag-label">Provider notes: </span>
                         <span class="tag-value">${item.provider}</span>
-                    </div>
+                    </div>` : '' }
                     
                     ${item.notes ? `<div class="tag-notes">Notes: ${item.notes}</div>` : ''}
                 </div>
