@@ -106,9 +106,9 @@
             display: flex;
             flex-direction: column;
             font-family: 'Arial', sans-serif;
-            font-size: 11px;
-            line-height: 1.2;
-            overflow: hidden;
+            font-size: 14px;
+            line-height: 2;
+            overflow: visible;
         }
 
         /* Tag header with Item ID and Name */
@@ -134,7 +134,7 @@
 
         .tag-field {
             display: flex;
-            font-size: 10px;
+            font-size: inherit;
         }
 
         .tag-label {
@@ -155,14 +155,13 @@
             padding: 2px 4px;
             border-radius: 2px;
             font-weight: bold;
-            font-size: 11px;
+            font-size: inherit;
             text-align: center;
             margin-top: auto;
         }
 
         .tag-notes {
-            font-size: 9px;
-            font-style: italic;
+            font-size: inherit;
             margin-top: 4px;
             padding-top: 4px;
             border-top: 1px dotted #999;
@@ -370,30 +369,30 @@
                 
                 <div class="tag-content">
                     <div class="tag-field">
-                        <span class="tag-label">Home location:</span>
+                        <span class="tag-label">Home location: </span>
                         <span class="tag-value">${item.locationCode}</span>
                     </div>
                     <div class="tag-field">
-                        <span class="tag-label">Due Back:</span>
+                        <span class="tag-label">Due Back: </span>
                         <span class="tag-value">${item.dueBack}</span>
                     </div>
                     <div class="tag-field">
-                        <span class="tag-label">Started:</span>
+                        <span class="tag-label">Maintenance started: </span>
                         <span class="tag-value">${item.started}</span>
                     </div>
                     <div class="tag-field">
-                        <span class="tag-label">Provider:</span>
-                        <span class="tag-value">${item.provider}</span>
+                        <span class="tag-label">Recorded By: </span>
+                        <span class="tag-value">${item.recordedBy}</span>
                     </div>
                     <div class="tag-field">
-                        <span class="tag-label">Recorded By:</span>
-                        <span class="tag-value">${item.recordedBy}</span>
+                        <span class="tag-label">Provider notes: </span>
+                        <span class="tag-value">${item.provider}</span>
                     </div>
                     
                     ${item.notes ? `<div class="tag-notes">Notes: ${item.notes}</div>` : ''}
                 </div>
                 
-                <div class="tag-maintenance-id">Maintenance ID: ${item.maintenanceId}</div>
+                <div class="tag-maintenance-id" style="display:none;">Maintenance ID: ${item.maintenanceId}</div>
             `;
             
             return tag;
