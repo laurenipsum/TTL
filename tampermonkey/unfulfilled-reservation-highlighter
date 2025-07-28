@@ -1,16 +1,21 @@
 // ==UserScript==
 // @name         Unfulfilled Reservation Highlighter
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  Highlight unfulfilled reservations in red
 // @author       ipsum (with Claude.ai)
 // @match        https://tacomatoollibrary.myturn.com/library/orgInventory/listReservations*
 // @match        https://*.myturn.com/library/orgInventory/listReservations*
 // @grant        none
+// @license      MIT
+// @downloadURL https://update.greasyfork.org/scripts/540256/Unfulfilled%20Reservation%20Highlighter.user.js
+// @updateURL https://update.greasyfork.org/scripts/540256/Unfulfilled%20Reservation%20Highlighter.meta.js
 // ==/UserScript==
 
 (function() {
     'use strict';
+
+
 
     function parseReservationDate(dateString) {
         // Parse dates like "Jun 12, 2025–Jun 26, 2025"
@@ -32,6 +37,24 @@
         return resDate < today;
     }
 
+    function formatDateWithDay(dateString) {
+        // Parse the original date range
+        const parts = dateString.split('–');
+        const startDatePart = parts[0].trim();
+        const endDatePart = parts[1].trim();
+
+        const startDate = new Date(startDatePart);
+        const endDate = new Date(endDatePart);
+
+        // Get day names
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const startDay = dayNames[startDate.getDay()];
+        const endDay = dayNames[endDate.getDay()];
+
+        // Format the new string with days
+        return `${startDay} ${startDatePart}–${endDay} ${endDatePart}`;
+    }
+
     function highlightUnfulfilledReservations() {
         // Find all reservation panels
         const reservationPanels = document.querySelectorAll('.panel.reservation');
@@ -45,6 +68,13 @@
 
                 try {
                     const reservationDate = parseReservationDate(dateText);
+
+                    // Update the date text to include day of week (only do this once)
+                    if (!dateElement.dataset.dayAdded) {
+                        const newDateText = formatDateWithDay(dateText);
+                        dateElement.textContent = newDateText;
+                        dateElement.dataset.dayAdded = 'true';
+                    }
 
                     if (isUnfulfilled(reservationDate)) {
                         // Add the unfulfilled class
