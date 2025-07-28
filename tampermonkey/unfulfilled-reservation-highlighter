@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Unfulfilled Reservation Highlighter
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  Highlight unfulfilled reservations in red
 // @author       ipsum (with Claude.ai)
 // @match        https://tacomatoollibrary.myturn.com/library/orgInventory/listReservations*
@@ -37,6 +37,31 @@
         return resDate < today;
     }
 
+    function countLibraryOpenDays(startDate) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+
+        // If start date is today or in the future, return 0
+        if (start >= today) return 0;
+
+        let count = 0;
+        let currentDate = new Date(start);
+
+        // Count library open days (Monday=1, Wednesday=3, Saturday=6)
+        while (currentDate < today) {
+            const dayOfWeek = currentDate.getDay();
+            if (dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 6) {
+                count++;
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        return count;
+    }
+
     function formatDateWithDay(dateString) {
         // Parse the original date range
         const parts = dateString.split('–');
@@ -51,8 +76,11 @@
         const startDay = dayNames[startDate.getDay()];
         const endDay = dayNames[endDate.getDay()];
 
-        // Format the new string with days
-        return `${startDay} ${startDatePart}–${endDay} ${endDatePart}`;
+        // Format the base date string
+        const baseDateString = `${startDay} ${startDatePart}–${endDay} ${endDatePart}`;
+
+        // Return just the date string - we'll add the pickup info separately
+        return baseDateString;
     }
 
     function highlightUnfulfilledReservations() {
@@ -79,9 +107,27 @@
                     if (isUnfulfilled(reservationDate)) {
                         // Add the unfulfilled class
                         dateElement.classList.add('unfulfilled-reservation-date');
+
+                        // Add pickup days missed info in a separate span
+                        if (!dateElement.querySelector('.pickup-days-missed')) {
+                            const missedDays = countLibraryOpenDays(reservationDate);
+                            if (missedDays > 0) {
+                                const dayWord = missedDays === 1 ? 'day' : 'days';
+                                const pickupSpan = document.createElement('span');
+                                pickupSpan.className = 'pickup-days-missed';
+                                pickupSpan.textContent = ` ${missedDays} pickup ${dayWord} missed`;
+                                dateElement.appendChild(pickupSpan);
+                            }
+                        }
                     } else {
                         // Remove the class if not unfulfilled (in case of dynamic updates)
                         dateElement.classList.remove('unfulfilled-reservation-date');
+
+                        // Remove pickup days span if it exists
+                        const pickupSpan = dateElement.querySelector('.pickup-days-missed');
+                        if (pickupSpan) {
+                            pickupSpan.remove();
+                        }
                     }
                 } catch (error) {
                     console.log('Could not parse date:', dateText, error);
