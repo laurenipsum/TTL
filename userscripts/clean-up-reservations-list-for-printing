@@ -9,6 +9,7 @@
     display: none;
     }
 
+
     /* make the alert text for problem items show up on the page? */
         .badge-danger::after {
           content: attr(data-original-title);
@@ -34,16 +35,18 @@
 
     /* style the date if it's an unfulfilled order whose original date has passed */ 
         .unfulfilled-reservation-date { 
-            color: #F3565D !important;
-        }
-        .unfulfilled-reservation-date::after { 
-            content: " Order not picked up"; 
-            color: #F3565D; 
             display: block; 
         }
 
-/* end always-present styles */ 
+    /* style the "# pickup days missed" message */ 
+        .pickup-days-missed { 
+            display: block; 
+            color: #F3565D; 
+            font-size: 1.5rem; 
+        }
 
+
+/* end always-present styles */ 
 
 
 /* print stylesheet only */
@@ -88,7 +91,7 @@
     /* make the item alert icon and the user alert icon bigger when printing? */
      .badge-danger, .reservation-alert, .reservation-alert i { 
          font-size: 2rem !important; 
-         background: red !important; 
+         background: #F3565D !important; 
          font-weight: bold; 
          color: white; 
          padding: 3px 10px; 
@@ -98,7 +101,7 @@
      /* style the inline user alert message that's created by the tampermonkey script */ 
     .inline-warning {
         padding: 4px 8px;
-        color: red !important;
+        color: #F3565D !important;
         font-weight: normal;
         display: inline-block !important; 
         font-size: 20px !important;
@@ -116,21 +119,23 @@
       content: attr(data-original-title);
       display: inline-block;
       margin: 8px;
-      color: RED !important;
+      color: #F3565D !important;
       padding: 2px;
       border-radius: 3px;
       font-size: 25px !important;
       font-weight: bold; 
       }
     
-    /* style the date if it's an unfulfilled order whose original date has passed */ 
-        .unfulfilled-reservation-date { 
-            color: #F3565D !important; 
+      /* style the date if it's an unfulfilled order whose original date has passed */ 
+      .unfulfilled-reservation-date { 
+        display: block; 
         }
-        .unfulfilled-reservation-date::after { 
-            content: " Order not picked up"; 
+
+        /* style the "# pickup days missed" message */ 
+        .pickup-days-missed { 
+            display: block; 
             color: #F3565D !important; 
-            display: block;
+            font-size: 1.5rem !important; 
         }
 
 }  /* end print styles */
