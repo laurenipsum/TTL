@@ -167,7 +167,7 @@
             font-size: inherit;
             margin-top: 4px;
             padding-top: 4px;
-            border-top: 1px solid #666;
+            border-top: 1px dotted #999;
         }
 
         /* ==== ALTERNATIVE STYLES (commented out - uncomment to use) ==== */
@@ -188,14 +188,34 @@
 <body>
     <div class="upload-section">
         <h1>Tool Maintenance Tag Generator</h1>
-        <p>Upload your maintenance export CSV to generate printable tags (4 per page)</p>
+        <p>Upload your maintenance files to generate printable tags (4 per page)</p>
         
-        <div class="file-input">
-            <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" />
+        <div class="upload-option">
+            <h3>Option 1: Single File (CSV or JSON)</h3>
+            <p><strong>CSV:</strong> Has location codes, but missing created dates<br>
+            <strong>JSON:</strong> Has created dates, but missing location codes</p>
+            <div class="file-input">
+                <input type="file" id="singleFile" accept=".csv,.xlsx,.xls,.json" />
+                <label for="singleFile">Choose single file</label>
+            </div>
+            <button onclick="processSingleFile()">Generate Tags from Single File</button>
+        </div>
+
+        <div class="upload-option" style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #ddd;">
+            <h3>Option 2: Dual Files (CSV + JSON) - Recommended</h3>
+            <p><strong>Best option:</strong> Combines both files to get complete data with location codes AND created dates</p>
+            <div class="file-input">
+                <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" />
+                <label for="csvFile">Choose CSV file</label>
+            </div>
+            <div class="file-input">
+                <input type="file" id="jsonFile" accept=".json" />
+                <label for="jsonFile">Choose JSON file</label>
+            </div>
+            <button onclick="processDualFiles()">Generate Tags from Both Files</button>
         </div>
         
-        <button onclick="processFile()">Generate Tags</button>
-        <button onclick="window.print()" id="printBtn" style="display:none;">Print Tags</button>
+        <button onclick="window.print()" id="printBtn" style="display:none; margin-top: 20px;">Print Tags</button>
         
         <div id="status"></div>
     </div>
@@ -212,10 +232,11 @@
             'Plan': 'plan',
             'Location Code': 'locationCode',
             'Due Back': 'dueBack',
-            'Due': 'maintDue', 
             'Started': 'started',
             'Provider': 'provider',
-            'Recorded By': 'recordedBy'
+            'Recorded By': 'recordedBy',
+            'Created': 'created',
+            'Last Updated': 'lastUpdated'
         };
 
         function showStatus(message, isError = false) {
@@ -224,8 +245,8 @@
             status.className = 'status ' + (isError ? 'error' : 'success');
         }
 
-        function processFile() {
-            const fileInput = document.getElementById('csvFile');
+        function processSingleFile() {
+            const fileInput = document.getElementById('singleFile');
             const file = fileInput.files[0];
             
             if (!file) {
@@ -236,8 +257,17 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const csvData = e.target.result;
-                    const rows = parseCSV(csvData);
+                    const fileData = e.target.result;
+                    let rows;
+                    
+                    // Auto-detect file type and parse accordingly
+                    if (file.name.toLowerCase().endsWith('.json')) {
+                        rows = parseJSON(fileData);
+                        showStatus(`Processed JSON file. Note: Location codes will be missing.`, false);
+                    } else {
+                        rows = parseCSV(fileData);
+                        showStatus(`Processed CSV file. Note: Created dates will be missing.`, false);
+                    }
                     
                     if (rows.length === 0) {
                         showStatus('No data found in file.', true);
@@ -256,6 +286,99 @@
             };
             
             reader.readAsText(file);
+        }
+
+        function processDualFiles() {
+            const csvFileInput = document.getElementById('csvFile');
+            const jsonFileInput = document.getElementById('jsonFile');
+            const csvFile = csvFileInput.files[0];
+            const jsonFile = jsonFileInput.files[0];
+            
+            if (!csvFile || !jsonFile) {
+                showStatus('Please select both CSV and JSON files.', true);
+                return;
+            }
+
+            showStatus('Processing both files...', false);
+            
+            let csvData, jsonData;
+            let filesProcessed = 0;
+
+            function processWhenBothLoaded() {
+                if (filesProcessed < 2) return;
+                
+                try {
+                    const csvRows = parseCSV(csvData);
+                    const jsonRows = parseJSON(jsonData);
+                    
+                    const mergedRows = mergeData(csvRows, jsonRows);
+                    
+                    if (mergedRows.length === 0) {
+                        showStatus('No matching data found between files.', true);
+                        return;
+                    }
+
+                    const processedData = processMaintenanceData(mergedRows);
+                    generateTags(processedData);
+                    
+                    showStatus(`Successfully merged and generated tags for ${processedData.length} items.`);
+                    document.getElementById('printBtn').style.display = 'inline-block';
+                    
+                } catch (error) {
+                    showStatus('Error processing files: ' + error.message, true);
+                }
+            }
+
+            // Read CSV file
+            const csvReader = new FileReader();
+            csvReader.onload = function(e) {
+                csvData = e.target.result;
+                filesProcessed++;
+                processWhenBothLoaded();
+            };
+            csvReader.readAsText(csvFile);
+
+            // Read JSON file
+            const jsonReader = new FileReader();
+            jsonReader.onload = function(e) {
+                jsonData = e.target.result;
+                filesProcessed++;
+                processWhenBothLoaded();
+            };
+            jsonReader.readAsText(jsonFile);
+        }
+
+        function mergeData(csvRows, jsonRows) {
+            // Create a map of JSON data by maintenance ID for quick lookup
+            const jsonMap = new Map();
+            jsonRows.forEach(row => {
+                const id = row['Maintenance ID'];
+                if (id) {
+                    jsonMap.set(id, row);
+                }
+            });
+
+            // Merge CSV data with JSON data where IDs match
+            const mergedRows = [];
+            csvRows.forEach(csvRow => {
+                const id = csvRow['Maintenance ID'];
+                const jsonRow = jsonMap.get(id);
+                
+                if (jsonRow) {
+                    // Merge: CSV data takes priority, but add JSON-only fields
+                    const mergedRow = {
+                        ...csvRow,
+                        'Created': jsonRow['Created'],
+                        'Last Updated': jsonRow['Last Updated']
+                    };
+                    mergedRows.push(mergedRow);
+                } else {
+                    // Include CSV row even if no JSON match (just won't have dates)
+                    mergedRows.push(csvRow);
+                }
+            });
+
+            return mergedRows;
         }
 
         function parseCSV(csvData) {
@@ -339,6 +462,48 @@
             return rows;
         }
 
+        function parseJSON(jsonData) {
+            const data = JSON.parse(jsonData);
+            
+            // Handle both direct array and wrapped in "data" property
+            const items = Array.isArray(data) ? data : data.data;
+            
+            if (!Array.isArray(items)) {
+                throw new Error('JSON does not contain an array of maintenance items');
+            }
+            
+            // Convert JSON objects to the format expected by processMaintenanceData
+            return items.map(item => {
+                return {
+                    'Maintenance ID': item.id ? item.id.toString() : '',
+                    'Name': item.item?.displayName || '',
+                    'Item ID': item.item?.internalId || '',
+                    'Notes': item.notes || '',
+                    'Plan': item.plan?.name || '',
+                    'Location Code': '', // Not available in JSON
+                    'Due Back': item.dueDate || '',
+                    'Started': item.startDate || '',
+                    'Provider': item.provider || '',
+                    'Recorded By': item.recordedBy?.username || '',
+                    'Created': formatDate(item.createdDate),
+                    'Last Updated': formatDate(item.lastUpdatedDate)
+                };
+            });
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            
+            const date = new Date(dateString);
+            const days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+            const dayName = days[date.getDay()];
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const year = date.getFullYear().toString().slice(-2);
+            
+            return `${dayName} ${month}/${day}/${year}`;
+        }
+
         function processMaintenanceData(rows) {
             // Extract and clean the data
             const processedRows = rows.map(row => {
@@ -403,7 +568,7 @@
                     <!-- only show Due Back if there is a value --> 
                     ${item.dueBack && item.dueBack.trim() ? `
                     <div class="tag-field">
-                        <span class="tag-label">Tool due: </span>
+                        <span class="tag-label">Due Back: </span>
                         <span class="tag-value">${item.dueBack}</span>
                     </div>` : ''} 
 
@@ -414,6 +579,7 @@
                         <span class="tag-value">${item.started}</span>
                     </div>` : '' }
 
+                    
                     <!-- only show Maintenance due date if there is a value -->
                     ${item.maintDue && item.maintDue.trim() ? `
                     <div class="tag-field">
@@ -425,19 +591,37 @@
                         <span class="tag-label">Recorded By: </span>
                         <span class="tag-value">${item.recordedBy}</span>
                     </div>
+
+                    ${item.created && item.created.trim() ? `
+                    <div class="tag-field">
+                        <span class="tag-label">Created: </span>
+                        <span class="tag-value">${item.created}</span>
+                    </div>` : ''}
+
+                    ${item.lastUpdated && item.lastUpdated.trim() ? `
+                    <div class="tag-field">
+                        <span class="tag-label">Last Updated: </span>
+                        <span class="tag-value">${item.lastUpdated}</span>
+                    </div>` : ''}
+
+                    <!-- only show Provider notes field if there is a value --> 
+                    ${item.provider && item.provider.trim() ? `
+                    <div class="tag-field">
+                        <span class="tag-label">Provider notes: </span>
+                        <span class="tag-value provider-notes-placeholder"></span>
+                    </div>` : '' }
                     
                     ${item.notes ? `     
                     <div class="tag-notes">
-
                         <!-- only show Provider notes field if there is a value --> 
                         ${item.provider && item.provider.trim() ? `
-                        <span class="tag-label">Provider notes: </span>
-                        <span class="tag-value provider-notes-placeholder"></span>` : '' }
+                        <div><span class="tag-label">Current location: </span>
+                        <span class="tag-value provider-notes-placeholder"></span></div>` : '' }
                         
-                        <span class="tag-label">Issue:</span> 
-                        <span class="notes-placeholder"></span>
-                        </div>` : ''}
-                </div>
+                        <div><span class="tag-label">Issue:</span> 
+                        <span class="notes-placeholder"></span></div>
+                        </div>` : ''}                
+                    </div>
                 
                 <div class="tag-maintenance-id">Maintenance ID: ${item.maintenanceId}</div>
             `;
@@ -460,7 +644,7 @@
                     notesSpan.innerHTML = item.notes;
                     console.log('After setting innerHTML:', notesSpan.innerHTML);  // debugging
                 } else {
-                    console.log('Could not find notes placeholder span');  // debugging
+                    console.log('Could not find notes placeholder span');  // debugging 
                 }
             }
             
