@@ -73,6 +73,23 @@
             .no-print { 
                 display: none !important; 
             }
+            
+            /* Style inputs to look like regular text when printing */
+            .current-location-input {
+                border: none !important;
+                background: transparent !important;
+                font-family: inherit !important;
+                font-size: inherit !important;
+                color: inherit !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: auto !important;
+            }
+            
+            /* Show blank line when input is empty */
+            .current-location-input:placeholder-shown::after {
+                content: "__________________";
+            }
         }
 
         /* ==== TAG LAYOUT STYLES ==== */
@@ -153,6 +170,23 @@
 
         /*make sure any p tags in notes fields don't break things */
         .tag-value p, .tag-notes p { display: inline; margin: 0; padding: 0; }
+
+        /* Style the current location input */
+        .current-location-input {
+            border: 1px solid #ccc;
+            background: #fff;
+            font-family: inherit;
+            font-size: inherit;
+            color: inherit;
+            padding: 2px 4px;
+            border-radius: 2px;
+            flex: 1;
+        }
+
+        .current-location-input:focus {
+            outline: 2px solid #007cba;
+            border-color: #007cba;
+        }
 
         /* Special styling for specific fields */
         .tag-maintenance-id {
@@ -497,6 +531,10 @@
             const tag = document.createElement('div');
             tag.className = 'tag';
             
+            // Determine the default current location value with priority:
+            // 1. currentLocation from data, 2. locationCode as fallback, 3. empty
+            const defaultCurrentLocation = item.currentLocation || item.locationCode || '';
+            
             tag.innerHTML = `
                 <div class="tag-header">
                     <div class="tag-item-id">${item.itemId}: ${item.name}</div>
@@ -511,17 +549,8 @@
                     
                     <div class="tag-field">
                         <span class="tag-label">Current location: </span>
-                        ${item.currentLocation && item.currentLocation.trim() ? `
-                            <span class="tag-value">${item.currentLocation}</span>` : 
-                        '<span class="tag-value">__________________</span>' } 
+                        <input type="text" class="current-location-input" value="${defaultCurrentLocation}" placeholder="__________________">
                     </div>
-
-                    <!-- only show Due Back if there is a value --> 
-                    ${item.dueBack && item.dueBack.trim() ? `
-                    <div class="tag-field">
-                        <span class="tag-label">Due Back: </span>
-                        <span class="tag-value">${item.dueBack}</span>
-                    </div>` : ''} 
 
                     <div class="tag-field">
                         <span class="tag-label">Recorded by: </span>
@@ -539,19 +568,18 @@
                         <span class="tag-label">Last Updated: </span>
                         <span class="tag-value">${item.lastUpdated}</span>
                     </div>` : ''}
+
+                    <!-- only show Provider notes field if there is a value --> 
+                    ${item.provider && item.provider.trim() ? `
+                    <div><span class="tag-label">Provider notes:</span>
+                    <span class="tag-value provider-notes-placeholder"></span></div>` : '' }
                     
                     ${item.notes ? `     
-                    <div class="tag-notes">
-                        <!-- only show Provider notes field if there is a value --> 
-                        ${item.provider && item.provider.trim() ? `
-                        <div><span class="tag-label">Current location: </span>
-                        <span class="tag-value provider-notes-placeholder"></span></div>` : '' }
-                        
+                    <div class="tag-notes">    
                         <div><span class="tag-label">Issue:</span> 
                         <span class="notes-placeholder"></span></div>
                         </div>` : ''}                
                 
-                <div class="tag-maintenance-id">Maintenance ID: ${item.maintenanceId}</div>
             `;
 
             //Insert the HTML content for notes fields
