@@ -169,53 +169,25 @@
             padding-top: 4px;
             border-top: 1px dotted #999;
         }
-
-        /* ==== ALTERNATIVE STYLES (commented out - uncomment to use) ==== */
-        /*
-        .tag {
-            border-radius: 4px;
-            background: #fafafa;
-        }
-        
-        .tag-header {
-            background: #e0e0e0;
-            margin: -8px -8px 6px -8px;
-            padding: 6px 8px;
-        }
-        */
     </style>
 </head>
 <body>
     <div class="upload-section">
         <h1>Tool Maintenance Tag Generator</h1>
-        <p>Upload your maintenance files to generate printable tags (4 per page)</p>
+        <p>Upload your CSV file to generate printable tags (4 per page)</p>
         
-        <div class="upload-option">
-            <h3>Option 1: Single File (CSV or JSON)</h3>
-            <p><strong>CSV:</strong> Has location codes, but missing created dates<br>
-            <strong>JSON:</strong> Has created dates, but missing location codes</p>
-            <div class="file-input">
-                <input type="file" id="singleFile" accept=".csv,.xlsx,.xls,.json" />
-                <label for="singleFile">Choose single file</label>
-            </div>
-            <button onclick="processSingleFile()">Generate Tags from Single File</button>
-        </div>
-
-        <div class="upload-option" style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #ddd;">
-            <h3>Option 2: Dual Files (CSV + JSON) - Recommended</h3>
-            <p><strong>Best option:</strong> Combines both files to get complete data with location codes AND created dates</p>
-            <div class="file-input">
-                <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" />
-                <label for="csvFile">Choose CSV file</label>
-            </div>
-            <div class="file-input">
-                <input type="file" id="jsonFile" accept=".json" />
-                <label for="jsonFile">Choose JSON file</label>
-            </div>
-            <button onclick="processDualFiles()">Generate Tags from Both Files</button>
+        <div class="file-input">
+            <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" />
+            <label for="csvFile">Choose CSV file (required)</label>
         </div>
         
-        <button onclick="window.print()" id="printBtn" style="display:none; margin-top: 20px;">Print Tags</button>
+        <div style="margin-top: 20px;">
+            <label for="jsonPaste"><strong>OPTIONAL:</strong> Paste JSON here for created dates:</label>
+            <textarea id="jsonPaste" rows="8" style="width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste your JSON data here to add created dates to the tags..."></textarea>
+        </div>
+        
+        <button onclick="processFiles()" style="margin-top: 20px;">Generate Tags</button>
+        <button onclick="window.print()" id="printBtn" style="display:none; margin-left: 10px;">Print Tags</button>
         
         <div id="status"></div>
     </div>
@@ -247,107 +219,58 @@
             status.className = 'status ' + (isError ? 'error' : 'success');
         }
 
-        function processSingleFile() {
-            const fileInput = document.getElementById('singleFile');
-            const file = fileInput.files[0];
+        function processFiles() {
+            const csvFileInput = document.getElementById('csvFile');
+            const jsonTextArea = document.getElementById('jsonPaste');
+            const csvFile = csvFileInput.files[0];
+            const jsonText = jsonTextArea.value.trim();
             
-            if (!file) {
-                showStatus('Please select a file first.', true);
+            if (!csvFile) {
+                showStatus('Please select a CSV file.', true);
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
+            showStatus('Processing files...', false);
+
+            const csvReader = new FileReader();
+            csvReader.onload = function(e) {
                 try {
-                    const fileData = e.target.result;
-                    let rows;
+                    const csvData = e.target.result;
+                    const csvRows = parseCSV(csvData);
                     
-                    // Auto-detect file type and parse accordingly
-                    if (file.name.toLowerCase().endsWith('.json')) {
-                        rows = parseJSON(fileData);
-                        showStatus(`Processed JSON file. Note: Location codes will be missing.`, false);
-                    } else {
-                        rows = parseCSV(fileData);
-                        showStatus(`Processed CSV file. Note: Created dates will be missing.`, false);
-                    }
-                    
-                    if (rows.length === 0) {
-                        showStatus('No data found in file.', true);
+                    if (csvRows.length === 0) {
+                        showStatus('No data found in CSV file.', true);
                         return;
                     }
 
-                    const processedData = processMaintenanceData(rows);
+                    let finalRows = csvRows;
+                    
+                    // If JSON is provided, merge the data
+                    if (jsonText) {
+                        try {
+                            const jsonRows = parseJSON(jsonText);
+                            finalRows = mergeData(csvRows, jsonRows);
+                            showStatus(`Successfully processed CSV and merged with JSON data.`, false);
+                        } catch (jsonError) {
+                            showStatus(`CSV processed successfully. JSON parsing failed: ${jsonError.message}. Using CSV data only.`, false);
+                            // Continue with just CSV data
+                        }
+                    } else {
+                        showStatus(`Processed CSV file. Note: Created dates not available without JSON data.`, false);
+                    }
+
+                    const processedData = processMaintenanceData(finalRows);
                     generateTags(processedData);
                     
                     showStatus(`Successfully generated tags for ${processedData.length} items.`);
                     document.getElementById('printBtn').style.display = 'inline-block';
                     
                 } catch (error) {
-                    showStatus('Error processing file: ' + error.message, true);
-                }
-            };
-            
-            reader.readAsText(file);
-        }
-
-        function processDualFiles() {
-            const csvFileInput = document.getElementById('csvFile');
-            const jsonFileInput = document.getElementById('jsonFile');
-            const csvFile = csvFileInput.files[0];
-            const jsonFile = jsonFileInput.files[0];
-            
-            if (!csvFile || !jsonFile) {
-                showStatus('Please select both CSV and JSON files.', true);
-                return;
-            }
-
-            showStatus('Processing both files...', false);
-            
-            let csvData, jsonData;
-            let filesProcessed = 0;
-
-            function processWhenBothLoaded() {
-                if (filesProcessed < 2) return;
-                
-                try {
-                    const csvRows = parseCSV(csvData);
-                    const jsonRows = parseJSON(jsonData);
-                    
-                    const mergedRows = mergeData(csvRows, jsonRows);
-                    
-                    if (mergedRows.length === 0) {
-                        showStatus('No matching data found between files.', true);
-                        return;
-                    }
-
-                    const processedData = processMaintenanceData(mergedRows);
-                    generateTags(processedData);
-                    
-                    showStatus(`Successfully merged and generated tags for ${processedData.length} items.`);
-                    document.getElementById('printBtn').style.display = 'inline-block';
-                    
-                } catch (error) {
                     showStatus('Error processing files: ' + error.message, true);
                 }
-            }
-
-            // Read CSV file
-            const csvReader = new FileReader();
-            csvReader.onload = function(e) {
-                csvData = e.target.result;
-                filesProcessed++;
-                processWhenBothLoaded();
             };
+            
             csvReader.readAsText(csvFile);
-
-            // Read JSON file
-            const jsonReader = new FileReader();
-            jsonReader.onload = function(e) {
-                jsonData = e.target.result;
-                filesProcessed++;
-                processWhenBothLoaded();
-            };
-            jsonReader.readAsText(jsonFile);
         }
 
         function mergeData(csvRows, jsonRows) {
@@ -506,19 +429,18 @@
             return `${dayName} ${month}/${day}/${year}`;
         }
 
-            function cleanPlanName(planName) {
-                if (!planName) return '';
-                const lowerPlan = planName.toLowerCase().trim();
-                if (lowerPlan === 'maintenance tracking') {
-                    return ''; // Don't render anything if the plan name is "Maintenance Tracking"
-                } else if (lowerPlan.includes('routine')) {
-                    return 'ROUTINE'; //if the plan includes "routine," just print "ROUTINE"
-                } else if (lowerPlan.includes('check for all parts')) {
-                    return 'CHECK FOR ALL PARTS'; //if it includes "check for all parts," print that in caps
-                }
+        function cleanPlanName(planName) {
+            if (!planName) return '';
+            const lowerPlan = planName.toLowerCase().trim();
+            if (lowerPlan === 'maintenance tracking') {
+                return ''; // Don't render anything if the plan name is "Maintenance Tracking"
+            } else if (lowerPlan.includes('routine')) {
+                return 'ROUTINE'; //if the plan includes "routine," just print "ROUTINE"
+            } else if (lowerPlan.includes('check for all parts')) {
+                return 'CHECK FOR ALL PARTS'; //if it includes "check for all parts," print that in caps
+            }
 
             return planName; // If it's not one of the above, just print the plan name as usual
-
         }
 
         function processMaintenanceData(rows) {
@@ -587,7 +509,7 @@
                     
                     <div class="tag-field">
                         <span class="tag-label">Current location: </span>
-                        ${item.dueBack && item.dueBack.trim() ? `
+                        ${item.currentLocation && item.currentLocation.trim() ? `
                             <span class="tag-value">${item.currentLocation}</span>` : 
                         '<span class="tag-value">__________________</span>' } 
                     </div>
@@ -598,20 +520,6 @@
                         <span class="tag-label">Due Back: </span>
                         <span class="tag-value">${item.dueBack}</span>
                     </div>` : ''} 
-
-                    <!-- hide maintenance started actually 
-                    ${item.started && item.started.trim() ? `
-                    <div class="tag-field">
-                        <span class="tag-label">Maintenance started: </span>
-                        <span class="tag-value">${item.started}</span>
-                    </div>` : '' }-->
-
-                    <!-- also hide maintenance due, since i have created date now 
-                    ${item.maintDue && item.maintDue.trim() ? `
-                    <div class="tag-field">
-                        <span class="tag-label">Maintenance due: </span>
-                        <span class="tag-value">${item.maintDue}</span>
-                    </div>` : '' }-->
 
                     <div class="tag-field">
                         <span class="tag-label">Recorded by: </span>
@@ -656,17 +564,13 @@
 
             //Notes field
             if (item.notes) { 
-                console.log('Raw notes data:', item.notes);  // debugging
                 const notesSpan = tag.querySelector('.notes-placeholder');
                 if (notesSpan) { 
                     notesSpan.innerHTML = item.notes;
-                    console.log('After setting innerHTML:', notesSpan.innerHTML);  // debugging
-                } else {
-                    console.log('Could not find notes placeholder span');  // debugging 
                 }
             }
             
-        return tag;
+            return tag;
         }
     </script>
 </body>
