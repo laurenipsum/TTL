@@ -107,7 +107,7 @@
             flex-direction: column;
             font-family: 'Arial', sans-serif;
             font-size: 18px;
-            line-height: 2;
+            line-height: 1.5;
             overflow: visible;
         }
 
@@ -149,6 +149,8 @@
             word-break: break-word;
         }
 
+        .tag-notes { line-height: 1.2; }
+
         /*make sure any p tags in notes fields don't break things */
         .tag-value p, .tag-notes p { display: inline; margin: 0; padding: 0; }
 
@@ -183,7 +185,7 @@
         
         <div style="margin-top: 20px;">
             <label for="jsonPaste"><strong>OPTIONAL:</strong> Paste JSON here for created dates:</label>
-            <textarea id="jsonPaste" rows="8" style="width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder="Paste your JSON data here to add created dates to the tags..."></textarea>
+            <textarea id="jsonPaste" rows="4" style="width: 80%; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; font-size: 12px;"></textarea>
         </div>
         
         <button onclick="processFiles()" style="margin-top: 20px;">Generate Tags</button>
