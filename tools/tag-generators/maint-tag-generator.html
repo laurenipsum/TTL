@@ -154,6 +154,8 @@
             font-size: inherit;
         }
 
+        .monospace { font-family: 'Courier New', Courier, monospace; }
+
         .tag-label {
             font-weight: bold;
             color: #444;
@@ -169,19 +171,20 @@
         .tag-notes { line-height: 1.2; }
 
         /*make sure any p tags in notes fields don't break things */
-        .tag-value p, .tag-notes p { display: inline; margin: 0; padding: 0; }
+        .tag-value p { display: inline; margin: 0; padding: 0; } /* non-notes fields stay inline */
+        .tag-notes p { display: block; margin: 0.1em 0; padding: 0; } /* notes fields paras behave correctly */
 
         /* Style the current location input */
         .current-location-input {
             border: 1px solid #ccc;
             background: #fff;
-            font-family: inherit;
+            font-family: 'Courier New', Courier, monospace;
             font-size: inherit;
             color: inherit;
-            padding: 2px 4px;
+            padding: 2px;
             border-radius: 2px;
             flex: 1;
-        }
+        }   
 
         .current-location-input:focus {
             outline: 2px solid #007cba;
@@ -539,17 +542,21 @@
                 <div class="tag-header">
                     <div class="tag-item-id">${item.itemId}: ${item.name}</div>
                     <div class="tag-value">${item.plan}</div>
+                     ${item.created && item.created.trim() ? `
+                        <span class="tag-label">Created: </span>
+                        <span class="tag-value">${item.created}</span>
+                    ` : ''}
                 </div>
                 
                 <div class="tag-content">
                     <div class="tag-field">
                         <span class="tag-label">Home location: </span>
-                        <span class="tag-value">${item.locationCode}</span>
+                        <span class="tag-value monospace">${item.locationCode}</span>
                     </div>
                     
                     <div class="tag-field">
                         <span class="tag-label">Current location: </span>
-                        <input type="text" class="current-location-input" value="${defaultCurrentLocation}" placeholder="__________________">
+                        <input type="text" class="current-location-input monospace" value="${defaultCurrentLocation}" placeholder="__________________">
                     </div>
 
                     <div class="tag-field">
