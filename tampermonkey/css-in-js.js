@@ -10,151 +10,143 @@
 // ==/UserScript==
 
 (function() {
-‘use strict’;
+“use strict”;
 
 ```
-// Create and inject the CSS styles
-var css = [
-    '/* always present, not just in print CSS */',
-    '',
-    '/* hide the membership type badge (not relevant for us, takes up space) -- currently this is just hiding all badges, but it didn\'t seem to break anything, but it may need to be adjusted if it turns out it did something else unintended */',
-    'span .badge { display: none; }',
-    '',
-    '/* hide the mailto envelope icons -- we don\'t use those either */',
-    'a[href^="mailto:"] {',
-    '    display: none;',
-    '}',
-    '',
-    '/* make the alert text for problem items show up on the page? */',
-    '.badge-danger::after {',
-    '    content: attr(data-original-title);',
-    '    display: inline-block;',
-    '    margin-left: 8px;',
-    '    color: white !important;',
-    '    background: #F3565D !important;',
-    '    padding: 2px 6px;',
-    '    border-radius: 3px;',
-    '    font-size: 1.2rem;',
-    '    font-weight: bold;',
-    '}',
-    '',
-    '/* style the inline user alert message that\'s created by the tampermonkey script */',
-    '.inline-warning {',
-    '    padding: 4px 8px;',
-    '    background: white;',
-    '    color: #F3565D;',
-    '    font-weight: normal;',
-    '    display: inline-block;',
-    '    max-width: 300px;',
-    '}',
-    '',
-    '/* style the date if it\'s an unfulfilled order whose original date has passed */',
-    '.unfulfilled-reservation-date {',
-    '    display: block;',
-    '}',
-    '',
-    '/* style the "# pickup days missed" message */',
-    '.pickup-days-missed {',
-    '    display: block;',
-    '    color: #F3565D;',
-    '    font-size: 1.5rem;',
-    '}',
-    '',
-    '/* end always-present styles */',
-    '',
-    '/* print stylesheet only */',
-    '@media print {',
-    '',
-    '    /* delete stuff at top of page */',
-    '    h3.page-title, div.portlet-title { display: none; }',
-    '',
-    '    /* hide reservation number because we don\'t use it */',
-    '    .col-sm-5 { font-size: 0 !important; } /* make text in that column 0 */',
-    '    div .panel-heading, .col-sm-5 * { font-size: 30px !important; } /* but then give all that column\'s children a text size back again */',
-    '',
-    '    /* attempting to hide the button rows without breaking anything else */',
-    '    div.panel-body > div:nth-child(1) > div.col-sm-7.col-sm-push-5.text-right.margin-bottom-10 { display: none; }',
-    '',
-    '    /* attempting to add page break after each reservation */',
-    '    .panel.reservation { break-after: page !important; }',
-    '    /* not sure if we\'ll keep this; on busy days it will generate a lot of sheets ... */',
-    '',
-    '    /* make the order status badges bigger */',
-    '    .badge.pull-right { display: none !important; }',
-    '',
-    '    /* get rid of the new "scroll to top" button that messes up printing */',
-    '    .scroll-to-top { display: none !important; }',
-    '',
-    '    /* can I make location bigger? */',
-    '    table.table { font-size: 25px !important; }',
-    '',
-    '    /* adjusting relative widths of dates and names on each order */',
-    '    .col-sm-7 { width: 25%; font-size: 14px; }',
-    '    .col-sm-5 { width: 75%; }',
-    '    .col-xs-8.col-sm-9 { width: 90% !important; }',
-    '    .col-xs-4.col-sm-3 { width: 10%; }',
-    '',
-    '    /* adjusting relative widths of items on table */',
-    '    th.col-xs-1 { width: 0px !important; }',
-    '    th.col-xs-3 { width: 15%; }',
-    '    th.col-xs-4 { width: 55%; }',
-    '',
-    '    /* make the item alert icon and the user alert icon bigger when printing? */',
-    '    .badge-danger, .reservation-alert, .reservation-alert i {',
-    '        font-size: 2rem !important;',
-    '        background: #F3565D !important;',
-    '        font-weight: bold;',
-    '        color: white;',
-    '        padding: 3px 10px;',
-    '        height: 3rem;',
-    '    }',
-    '',
-    '    /* style the inline user alert message that\'s created by the tampermonkey script */',
-    '    .inline-warning {',
-    '        padding: 4px 8px;',
-    '        color: #F3565D !important;',
-    '        font-weight: normal;',
-    '        display: inline-block !important;',
-    '        font-size: 20px !important;',
-    '        max-width: 500px;',
-    '    }',
-    '',
-    '    /* hide the email icon */',
-    '    i.fa-envelope { display: none !important; }',
-    '',
-    '    /* remove color on borders so I can print in color and the only color will be alert icons or messages */',
-    '    .panel.reservation, .panel.success, div.panel-heading { border-color: #ddd !important; }',
-    '',
-    '    /* make the alert text for problem items show up when printing? */',
-    '    .badge-danger::after {',
-    '        content: attr(data-original-title);',
-    '        display: inline-block;',
-    '        margin: 8px;',
-    '        color: #F3565D !important;',
-    '        padding: 2px;',
-    '        border-radius: 3px;',
-    '        font-size: 25px !important;',
-    '        font-weight: bold;',
-    '    }',
-    '',
-    '    /* style the date if it\'s an unfulfilled order whose original date has passed */',
-    '    .unfulfilled-reservation-date {',
-    '        display: block;',
-    '    }',
-    '',
-    '    /* style the "# pickup days missed" message */',
-    '    .pickup-days-missed {',
-    '        display: block;',
-    '        color: #F3565D !important;',
-    '        font-size: 1.5rem !important;',
-    '    }',
-    '',
-    '} /* end print styles */'
-].join('\n');
+var css = "/* always present, not just in print CSS */\n\n";
+css += "/* hide the membership type badge */\n";
+css += "span .badge { display: none; }\n\n";
 
-// Create a style element and add it to the document head
-var styleElement = document.createElement('style');
-styleElement.type = 'text/css';
+css += "/* hide the mailto envelope icons */\n";
+css += "a[href^=\"mailto:\"] {\n";
+css += "    display: none;\n";
+css += "}\n\n";
+
+css += "/* make the alert text for problem items show up on the page */\n";
+css += ".badge-danger::after {\n";
+css += "    content: attr(data-original-title);\n";
+css += "    display: inline-block;\n";
+css += "    margin-left: 8px;\n";
+css += "    color: white !important;\n";
+css += "    background: #F3565D !important;\n";
+css += "    padding: 2px 6px;\n";
+css += "    border-radius: 3px;\n";
+css += "    font-size: 1.2rem;\n";
+css += "    font-weight: bold;\n";
+css += "}\n\n";
+
+css += "/* style the inline user alert message */\n";
+css += ".inline-warning {\n";
+css += "    padding: 4px 8px;\n";
+css += "    background: white;\n";
+css += "    color: #F3565D;\n";
+css += "    font-weight: normal;\n";
+css += "    display: inline-block;\n";
+css += "    max-width: 300px;\n";
+css += "}\n\n";
+
+css += "/* style the date if unfulfilled order date has passed */\n";
+css += ".unfulfilled-reservation-date {\n";
+css += "    display: block;\n";
+css += "}\n\n";
+
+css += "/* style the pickup days missed message */\n";
+css += ".pickup-days-missed {\n";
+css += "    display: block;\n";
+css += "    color: #F3565D;\n";
+css += "    font-size: 1.5rem;\n";
+css += "}\n\n";
+
+css += "/* print stylesheet only */\n";
+css += "@media print {\n\n";
+
+css += "    /* delete stuff at top of page */\n";
+css += "    h3.page-title, div.portlet-title { display: none; }\n\n";
+
+css += "    /* hide reservation number */\n";
+css += "    .col-sm-5 { font-size: 0 !important; }\n";
+css += "    div .panel-heading, .col-sm-5 * { font-size: 30px !important; }\n\n";
+
+css += "    /* hide button rows */\n";
+css += "    div.panel-body > div:nth-child(1) > div.col-sm-7.col-sm-push-5.text-right.margin-bottom-10 { display: none; }\n\n";
+
+css += "    /* add page break after each reservation */\n";
+css += "    .panel.reservation { break-after: page !important; }\n\n";
+
+css += "    /* make the order status badges bigger */\n";
+css += "    .badge.pull-right { display: none !important; }\n\n";
+
+css += "    /* get rid of scroll to top button */\n";
+css += "    .scroll-to-top { display: none !important; }\n\n";
+
+css += "    /* make location bigger */\n";
+css += "    table.table { font-size: 25px !important; }\n\n";
+
+css += "    /* adjusting relative widths of dates and names */\n";
+css += "    .col-sm-7 { width: 25%; font-size: 14px; }\n";
+css += "    .col-sm-5 { width: 75%; }\n";
+css += "    .col-xs-8.col-sm-9 { width: 90% !important; }\n";
+css += "    .col-xs-4.col-sm-3 { width: 10%; }\n\n";
+
+css += "    /* adjusting relative widths of items on table */\n";
+css += "    th.col-xs-1 { width: 0px !important; }\n";
+css += "    th.col-xs-3 { width: 15%; }\n";
+css += "    th.col-xs-4 { width: 55%; }\n\n";
+
+css += "    /* make alert icons bigger when printing */\n";
+css += "    .badge-danger, .reservation-alert, .reservation-alert i {\n";
+css += "        font-size: 2rem !important;\n";
+css += "        background: #F3565D !important;\n";
+css += "        font-weight: bold;\n";
+css += "        color: white;\n";
+css += "        padding: 3px 10px;\n";
+css += "        height: 3rem;\n";
+css += "    }\n\n";
+
+css += "    /* style the inline user alert message for print */\n";
+css += "    .inline-warning {\n";
+css += "        padding: 4px 8px;\n";
+css += "        color: #F3565D !important;\n";
+css += "        font-weight: normal;\n";
+css += "        display: inline-block !important;\n";
+css += "        font-size: 20px !important;\n";
+css += "        max-width: 500px;\n";
+css += "    }\n\n";
+
+css += "    /* hide the email icon */\n";
+css += "    i.fa-envelope { display: none !important; }\n\n";
+
+css += "    /* remove color on borders */\n";
+css += "    .panel.reservation, .panel.success, div.panel-heading { border-color: #ddd !important; }\n\n";
+
+css += "    /* make alert text show up when printing */\n";
+css += "    .badge-danger::after {\n";
+css += "        content: attr(data-original-title);\n";
+css += "        display: inline-block;\n";
+css += "        margin: 8px;\n";
+css += "        color: #F3565D !important;\n";
+css += "        padding: 2px;\n";
+css += "        border-radius: 3px;\n";
+css += "        font-size: 25px !important;\n";
+css += "        font-weight: bold;\n";
+css += "    }\n\n";
+
+css += "    /* style unfulfilled reservation date for print */\n";
+css += "    .unfulfilled-reservation-date {\n";
+css += "        display: block;\n";
+css += "    }\n\n";
+
+css += "    /* style pickup days missed for print */\n";
+css += "    .pickup-days-missed {\n";
+css += "        display: block;\n";
+css += "        color: #F3565D !important;\n";
+css += "        font-size: 1.5rem !important;\n";
+css += "    }\n\n";
+
+css += "} /* end print styles */";
+
+var styleElement = document.createElement("style");
+styleElement.type = "text/css";
 styleElement.innerHTML = css;
 document.head.appendChild(styleElement);
 ```
