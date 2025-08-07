@@ -8,16 +8,30 @@
         /* ==== APPLICATION INTERFACE STYLES ==== */
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding-top: 200px; /* Space for sticky header */
             background-color: #f5f5f5;
         }
 
         .upload-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 10px 20px;
+            z-index: 1000;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .print-controls {
+            display: none; /* Hidden until tags generated */
+        }
+
+        .selection-badge {
+            font-weight: bold;
+            color: #007cba;
+            margin-right: 15px;
         }
 
         .file-input {
@@ -25,7 +39,6 @@
             padding: 10px;
             border: 2px dashed #ccc;
             border-radius: 4px;
-            text-align: center;
         }
 
         button {
@@ -48,6 +61,7 @@
         }
 
         .status {
+            display: inline;
             margin: 10px 0;
             padding: 10px;
             border-radius: 4px;
@@ -66,12 +80,19 @@
         /* ==== PRINT STYLES FOR TAGS ==== */
         @media print {
             body { 
-                background: white; 
-                margin: 0; 
+                margin: 0;
+                padding-top: 0;
             }
             .upload-section, 
-            .no-print { 
-                display: none !important; 
+            .no-print,
+            .print-checkbox {
+                display: none !important;
+                visibility: hidden !important;  
+            }
+            
+            /* Only print selected tags - this rule is now handled by JavaScript rebuilding */
+            .print-checkbox {
+                display: none !important;
             }
             
             /* Style inputs to look like regular text when printing */
@@ -90,25 +111,32 @@
             .current-location-input:placeholder-shown::after {
                 content: "__________________";
             }
+
+            /* Hide empty fields when printing */
+            .tag-field:empty,
+            .tag-field .tag-value:empty,
+            .tag-notes:empty {
+                display: none !important;
+            }
         }
 
         /* ==== TAG LAYOUT STYLES ==== */
         .tags-container {
             display: none; /* Hidden until generated */
+            margin: 20px;
         }
 
         .page {
             width: 8.5in;
             height: 11in;
-            margin: 0 auto 20px auto;
-            padding: 0.25in;
+            margin: 0;
+            padding: .25in;
             background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             page-break-after: always;
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
-            gap: 0.125in;
+            gap: 0.25in;
         }
 
         .page:last-child {
@@ -126,6 +154,21 @@
             font-size: 18px;
             line-height: 1.5;
             overflow: visible;
+            position: relative;
+        }
+
+        /* Print checkbox styling */
+        .print-checkbox {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        /* Visual styling for selected tags - you can customize this */
+        .selected-for-print {
+            /* Add your custom styling here - this class will be toggled */
         }
 
         /* Tag header with Item ID and Name */
@@ -146,12 +189,22 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 1px;
         }
 
         .tag-field {
             display: flex;
             font-size: inherit;
+        }
+
+        /* Hide empty tag fields */
+        .tag-field:empty {
+            display: none;
+        }
+
+        /* Hide empty tag fields */
+        .tag-field:empty {
+            display: none;
         }
 
         .monospace { font-family: 'Courier New', Courier, monospace; }
@@ -168,7 +221,14 @@
             word-break: break-word;
         }
 
-        .tag-notes { line-height: 1.2; }
+        .tag-notes { 
+            line-height: 1.2; 
+        }
+
+        /* Hide empty notes sections */
+        .tag-notes:empty {
+            display: none;
+        }
 
         /*make sure any p tags in notes fields don't break things */
         .tag-value p { display: inline; margin: 0; padding: 0; } /* non-notes fields stay inline */
@@ -179,7 +239,6 @@
             border: 1px solid #ccc;
             background: #fff;
             font-family: 'Courier New', Courier, monospace;
-            font-size: inherit;
             color: inherit;
             padding: 2px;
             border-radius: 2px;
@@ -213,22 +272,32 @@
 <body>
     <div class="upload-section">
         <h1>Tool Maintenance Tag Generator</h1>
-        <p>Upload your CSV file to generate printable tags (4 per page)</p>
         
-        <div class="file-input">
-            <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" />
+        <div style="display: inline-block; margin: 10px; width: 30%; vertical-align: top; ">
             <label for="csvFile">Choose CSV file (required)</label>
+            <div class="file-input">
+                <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" />
+            </div>
         </div>
         
-        <div style="margin-top: 20px;">
-            <label for="jsonPaste"><strong>OPTIONAL:</strong> Paste JSON here for created dates:</label>
-            <textarea id="jsonPaste" rows="4" style="width: 80%; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; font-size: 12px;"></textarea>
+        <div style="margin: 10px; display: inline-block; width: 55%; vertical-align: top;">
+            <label for="jsonPaste">OPTIONAL: Paste JSON response from maintenance page here to include created dates on tags</label><br>
+            <textarea id="jsonPaste" rows="1" style="width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; font-size: 12px;"></textarea>
         </div>
         
-        <button onclick="processFiles()" style="margin-top: 20px;">Generate Tags</button>
-        <button onclick="window.print()" id="printBtn" style="display:none; margin-left: 10px;">Print Tags</button>
+        <div>
+            <button onclick="processFiles()">Generate Tags</button>         
+            <div id="status"></div>
+            <div class="print-controls" id="printControls" style="float: right;">
+                <span class="selection-badge" id="selectionBadge">0 of 0 tags selected</span>
+                <button onclick="selectAll()">Select All</button>
+                <button onclick="unselectAll()">Unselect All</button>
+                <button onclick="printSelected()" id="printBtn">Print Selected</button>
+            </div>
+        </div>
         
-        <div id="status"></div>
+        
+        
     </div>
 
     <div id="tagsContainer" class="tags-container"></div>
@@ -252,10 +321,92 @@
             'Current Location': 'currentLocation'
         };
 
+        let totalTags = 0;
+
         function showStatus(message, isError = false) {
             const status = document.getElementById('status');
             status.textContent = message;
             status.className = 'status ' + (isError ? 'error' : 'success');
+        }
+
+        function updateSelectionBadge() {
+            const selectedCount = document.querySelectorAll('.tag.selected-for-print').length;
+            const badge = document.getElementById('selectionBadge');
+            badge.textContent = `${selectedCount} of ${totalTags} tags selected`;
+            
+            // Enable/disable print button based on selection
+            const printBtn = document.getElementById('printBtn');
+            printBtn.disabled = selectedCount === 0;
+        }
+
+        function selectAll() {
+            document.querySelectorAll('.tag').forEach(tag => {
+                tag.classList.add('selected-for-print');
+                const checkbox = tag.querySelector('.print-checkbox');
+                if (checkbox) checkbox.checked = true;
+            });
+            updateSelectionBadge();
+        }
+
+        function unselectAll() {
+            document.querySelectorAll('.tag').forEach(tag => {
+                tag.classList.remove('selected-for-print');
+                const checkbox = tag.querySelector('.print-checkbox');
+                if (checkbox) checkbox.checked = false;
+            });
+            updateSelectionBadge();
+        }
+
+        function printSelected() {
+            const selectedCount = document.querySelectorAll('.tag.selected-for-print').length;
+            if (selectedCount === 0) {
+                showStatus('Please select at least one tag to print.', true);
+                return;
+            }
+            
+            // Temporarily rebuild the layout to only include selected tags
+            const container = document.getElementById('tagsContainer');
+            const originalHTML = container.innerHTML;
+            
+            // Get all selected tags
+            const selectedTags = Array.from(document.querySelectorAll('.tag.selected-for-print'));
+            
+            // Clear container and rebuild with only selected tags
+            container.innerHTML = '';
+            
+            // Create new pages with 4 selected tags each
+            for (let i = 0; i < selectedTags.length; i += 4) {
+                const page = document.createElement('div');
+                page.className = 'page';
+                
+                // Add up to 4 selected tags per page
+                for (let j = 0; j < 4 && (i + j) < selectedTags.length; j++) {
+                    const tag = selectedTags[i + j].cloneNode(true);
+                    // Remove checkbox from cloned tag for printing
+                    const checkbox = tag.querySelector('.print-checkbox');
+                    if (checkbox) checkbox.remove();
+                    page.appendChild(tag);
+                }
+                
+                container.appendChild(page);
+            }
+            
+            // Print
+            window.print();
+            
+            // Restore original layout after printing
+            setTimeout(() => {
+                container.innerHTML = originalHTML;
+            }, 100);
+        }
+
+        function toggleTagSelection(checkbox, tag) {
+            if (checkbox.checked) {
+                tag.classList.add('selected-for-print');
+            } else {
+                tag.classList.remove('selected-for-print');
+            }
+            updateSelectionBadge();
         }
 
         function processFiles() {
@@ -301,8 +452,12 @@
                     const processedData = processMaintenanceData(finalRows);
                     generateTags(processedData);
                     
-                    showStatus(`Successfully generated tags for ${processedData.length} items.`);
-                    document.getElementById('printBtn').style.display = 'inline-block';
+                    totalTags = processedData.length;
+                    showStatus(`Successfully generated tags for ${totalTags} items.`);
+                    
+                    // Show print controls
+                    document.getElementById('printControls').style.display = 'block';
+                    updateSelectionBadge();
                     
                 } catch (error) {
                     showStatus('Error processing files: ' + error.message, true);
@@ -538,13 +693,15 @@
             // 1. currentLocation from data, 2. locationCode as fallback, 3. empty
             const defaultCurrentLocation = item.currentLocation || item.locationCode || '';
             
-            tag.innerHTML = `
+            // Build the tag content dynamically, only including fields that have values
+            let tagContent = `
+                <input type="checkbox" class="print-checkbox" onchange="toggleTagSelection(this, this.parentElement)">
+                
                 <div class="tag-header">
                     <div class="tag-item-id">${item.itemId}: ${item.name}</div>
-                    <div class="tag-value">${item.plan}</div>
-                     ${item.created && item.created.trim() ? `
-                        <span class="tag-label">Created: </span>
-                        <span class="tag-value">${item.created}</span>
+                    ${item.plan ? `<div class="tag-value">${item.plan}</div>` : ''}
+                    ${item.created && item.created.trim() ? `
+                        <div><span class="tag-label">Created: </span><span class="tag-value">${item.created}</span></div>
                     ` : ''}
                 </div>
                 
@@ -559,15 +716,10 @@
                         <input type="text" class="current-location-input monospace" value="${defaultCurrentLocation}" placeholder="__________________">
                     </div>
 
+                    ${item.recordedBy ? `
                     <div class="tag-field">
                         <span class="tag-label">Recorded by: </span>
                         <span class="tag-value">${item.recordedBy}</span>
-                    </div>
-
-                    ${item.created && item.created.trim() ? `
-                    <div class="tag-field">
-                        <span class="tag-label">Created: </span>
-                        <span class="tag-value">${item.created}</span>
                     </div>` : ''}
 
                     ${item.lastUpdated && item.lastUpdated.trim() ? `
@@ -576,37 +728,23 @@
                         <span class="tag-value">${item.lastUpdated}</span>
                     </div>` : ''}
 
-                    <!-- only show Provider notes field if there is a value --> 
                     ${item.provider && item.provider.trim() ? `
-                    <div><span class="tag-label">Provider notes:</span>
-                    <span class="tag-value provider-notes-placeholder"></span></div>` : '' }
+                    <div class="tag-field">
+                        <span class="tag-label">Provider notes: </span>
+                        <span class="tag-value">${item.provider}</span>
+                    </div>` : ''}
                     
-                    ${item.notes ? `     
+                    ${item.notes && item.notes.trim() ? `
                     <div class="tag-notes">    
-                        <div><span class="tag-label">Issue:</span> 
-                        <span class="notes-placeholder"></span></div>
-                        </div>` : ''}                
-                
+                        <div class="tag-field">
+                            <div class="tag-label">Issue: </div>
+                            <div class="tag-value">${item.notes}</div>
+                        </div>
+                    </div>` : ''}
+                </div>
             `;
-
-            //Insert the HTML content for notes fields
             
-            // Provider notes field
-            if (item.provider && item.provider.trim()) { 
-                const providerSpan = tag.querySelector('.provider-notes-placeholder');
-                if (providerSpan) { 
-                    providerSpan.innerHTML = item.provider;
-                }
-            }
-
-            //Notes field
-            if (item.notes) { 
-                const notesSpan = tag.querySelector('.notes-placeholder');
-                if (notesSpan) { 
-                    notesSpan.innerHTML = item.notes;
-                }
-            }
-            
+            tag.innerHTML = tagContent;
             return tag;
         }
     </script>
