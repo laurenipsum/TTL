@@ -85,14 +85,9 @@
             }
             .upload-section, 
             .no-print,
-            .print-checkbox {
+            .quantity-input {
                 display: none !important;
                 visibility: hidden !important;  
-            }
-            
-            /* Only print selected tags - this rule is now handled by JavaScript rebuilding */
-            .print-checkbox {
-                display: none !important;
             }
             
             /* Style inputs to look like regular text when printing */
@@ -157,18 +152,23 @@
             position: relative;
         }
 
-        /* Print checkbox styling */
-        .print-checkbox {
+        /* Quantity input styling */
+        .quantity-input {
             position: absolute;
             top: 5px;
             right: 5px;
-            transform: scale(1.2);
-            cursor: pointer;
+            width: 30px;
+            height: 24px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
         }
 
-        /* Visual styling for selected tags - you can customize this */
-        .selected-for-print {
-            /* Add your custom styling here - this class will be toggled */
+        .quantity-input:focus {
+            outline: 2px solid #007cba;
+            border-color: #007cba;
         }
 
         /* Tag header with Item ID and Name */
@@ -195,11 +195,6 @@
         .tag-field {
             display: flex;
             font-size: inherit;
-        }
-
-        /* Hide empty tag fields */
-        .tag-field:empty {
-            display: none;
         }
 
         /* Hide empty tag fields */
@@ -289,8 +284,8 @@
             <button onclick="processFiles()">Generate Tags</button>         
             <div id="status"></div>
             <div class="print-controls" id="printControls" style="float: right;">
-                <span class="selection-badge" id="selectionBadge">0 of 0 tags selected</span>
-                <button onclick="selectAll()">Select All</button>
+                <span class="selection-badge" id="selectionBadge">0 tags, 0 total copies selected</span>
+                <button onclick="setAllToOne()">Set All to 1 Copy</button>
                 <button onclick="unselectAll()">Unselect All</button>
                 <button onclick="printSelected()" id="printBtn">Print Selected</button>
             </div>
@@ -330,61 +325,84 @@
         }
 
         function updateSelectionBadge() {
-            const selectedCount = document.querySelectorAll('.tag.selected-for-print').length;
+            const quantityInputs = document.querySelectorAll('.quantity-input');
+            let tagsSelected = 0;
+            let totalCopies = 0;
+            
+            quantityInputs.forEach(input => {
+                const quantity = parseInt(input.value) || 0;
+                if (quantity > 0) {
+                    tagsSelected++;
+                    totalCopies += quantity;
+                }
+            });
+            
             const badge = document.getElementById('selectionBadge');
-            badge.textContent = `${selectedCount} of ${totalTags} tags selected`;
+            badge.textContent = `${tagsSelected} tags, ${totalCopies} total copies selected`;
             
             // Enable/disable print button based on selection
             const printBtn = document.getElementById('printBtn');
-            printBtn.disabled = selectedCount === 0;
+            printBtn.disabled = totalCopies === 0;
         }
 
-        function selectAll() {
-            document.querySelectorAll('.tag').forEach(tag => {
-                tag.classList.add('selected-for-print');
-                const checkbox = tag.querySelector('.print-checkbox');
-                if (checkbox) checkbox.checked = true;
+        function setAllToOne() {
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.value = '1';
             });
             updateSelectionBadge();
         }
 
         function unselectAll() {
-            document.querySelectorAll('.tag').forEach(tag => {
-                tag.classList.remove('selected-for-print');
-                const checkbox = tag.querySelector('.print-checkbox');
-                if (checkbox) checkbox.checked = false;
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.value = '0';
             });
             updateSelectionBadge();
         }
 
         function printSelected() {
-            const selectedCount = document.querySelectorAll('.tag.selected-for-print').length;
-            if (selectedCount === 0) {
+            const quantityInputs = document.querySelectorAll('.quantity-input');
+            let totalCopies = 0;
+            
+            quantityInputs.forEach(input => {
+                const quantity = parseInt(input.value) || 0;
+                totalCopies += quantity;
+            });
+            
+            if (totalCopies === 0) {
                 showStatus('Please select at least one tag to print.', true);
                 return;
             }
             
-            // Temporarily rebuild the layout to only include selected tags
+            // Temporarily rebuild the layout to include the right number of copies
             const container = document.getElementById('tagsContainer');
             const originalHTML = container.innerHTML;
             
-            // Get all selected tags
-            const selectedTags = Array.from(document.querySelectorAll('.tag.selected-for-print'));
+            // Get all tags with their quantities
+            const tagsWithQuantities = [];
+            quantityInputs.forEach(input => {
+                const quantity = parseInt(input.value) || 0;
+                if (quantity > 0) {
+                    const tag = input.closest('.tag');
+                    for (let i = 0; i < quantity; i++) {
+                        tagsWithQuantities.push(tag);
+                    }
+                }
+            });
             
-            // Clear container and rebuild with only selected tags
+            // Clear container and rebuild with copies
             container.innerHTML = '';
             
-            // Create new pages with 4 selected tags each
-            for (let i = 0; i < selectedTags.length; i += 4) {
+            // Create new pages with 4 tags each
+            for (let i = 0; i < tagsWithQuantities.length; i += 4) {
                 const page = document.createElement('div');
                 page.className = 'page';
                 
-                // Add up to 4 selected tags per page
-                for (let j = 0; j < 4 && (i + j) < selectedTags.length; j++) {
-                    const tag = selectedTags[i + j].cloneNode(true);
-                    // Remove checkbox from cloned tag for printing
-                    const checkbox = tag.querySelector('.print-checkbox');
-                    if (checkbox) checkbox.remove();
+                // Add up to 4 tags per page
+                for (let j = 0; j < 4 && (i + j) < tagsWithQuantities.length; j++) {
+                    const tag = tagsWithQuantities[i + j].cloneNode(true);
+                    // Remove quantity input from cloned tag for printing
+                    const quantityInput = tag.querySelector('.quantity-input');
+                    if (quantityInput) quantityInput.remove();
                     page.appendChild(tag);
                 }
                 
@@ -400,12 +418,13 @@
             }, 100);
         }
 
-        function toggleTagSelection(checkbox, tag) {
-            if (checkbox.checked) {
-                tag.classList.add('selected-for-print');
-            } else {
-                tag.classList.remove('selected-for-print');
-            }
+        function onQuantityChange(input) {
+            // Ensure value is between 0 and 9
+            let value = parseInt(input.value) || 0;
+            if (value < 0) value = 0;
+            if (value > 9) value = 9;
+            input.value = value;
+            
             updateSelectionBadge();
         }
 
@@ -695,7 +714,7 @@
             
             // Build the tag content dynamically, only including fields that have values
             let tagContent = `
-                <input type="checkbox" class="print-checkbox" onchange="toggleTagSelection(this, this.parentElement)">
+                <input type="number" class="quantity-input" min="0" max="9" value="0" onchange="onQuantityChange(this)" oninput="onQuantityChange(this)">
                 
                 <div class="tag-header">
                     <div class="tag-item-id">${item.itemId}: ${item.name}</div>
