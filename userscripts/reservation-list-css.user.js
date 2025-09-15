@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Clean up reservations list for printing tags
+// @name         Clean up reservations list for printing tags - DEV
 // @namespace    https://github.com/laurenipsum/TTL
-// @version      1.0
+// @version      1.0.1
 // @description  Modify the TTL myTurn reservations list for display and for printing reservation tags
 // @author       ipsum
 // @match        https://tacomatoollibrary.myturn.com/library/orgInventory/listReservations*
@@ -54,6 +54,9 @@
     css += "    display: block;\n";
     css += "    color: #F3565D;\n";
     css += "    font-size: 1.5rem;\n";
+    css += "}\n\n";
+    css += ".hidden-xs, .hidden-sm, .hidden-md {\n"
+    css += "   display: none;\n";
     css += "}\n\n";
 
     css += "/* print stylesheet only */\n";
