@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Clean up reservations list for printing tags - DEV
+// @name         Clean up reservations list for printing tags
 // @namespace    https://github.com/laurenipsum/TTL
 // @version      1.0.1
 // @description  Modify the TTL myTurn reservations list for display and for printing reservation tags
