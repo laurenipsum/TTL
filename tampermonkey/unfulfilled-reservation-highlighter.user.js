@@ -1,15 +1,13 @@
 // ==UserScript==
 // @name         Unfulfilled Reservation Highlighter
-// @namespace    http://tampermonkey.net/
-// @version      1.3
+// @namespace    https://github.com/laurenipsum/TTL
+// @version      1.4
 // @description  Highlight unfulfilled reservations in red
 // @author       ipsum (with Claude.ai)
 // @match        https://tacomatoollibrary.myturn.com/library/orgInventory/listReservations*
 // @match        https://*.myturn.com/library/orgInventory/listReservations*
 // @grant        none
 // @license      MIT
-// @downloadURL https://update.greasyfork.org/scripts/540256/Unfulfilled%20Reservation%20Highlighter.user.js
-// @updateURL https://update.greasyfork.org/scripts/540256/Unfulfilled%20Reservation%20Highlighter.meta.js
 // ==/UserScript==
 
 (function() {

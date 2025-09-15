@@ -1,12 +1,13 @@
 // ==UserScript==
-// @name         Tooltip to Inline Display
-// @namespace    http://tampermonkey.net/
-// @version      1.5
-// @description  Replace hover tooltips with inline text display
-// @author       ipsum + Claude.ai :( 
+// @name         Display tooltips inline instead
+// @namespace    https://github.com/laurenipsum/TTL
+// @version      1.6
+// @description  Replace hover tooltips with inline text display for item and user alerts
+// @author       laurenipsum
 // @match        https://tacomatoollibrary.myturn.com/library/orgInventory/listReservations*
 // @grant        none
 // @run-at       document-end
+// @license      MIT
 // ==/UserScript==
 
 (function() {
@@ -206,17 +207,6 @@
                 const inlineWarning = document.createElement('span');
                 inlineWarning.className = 'inline-warning';
                 inlineWarning.style.cssText = `
-                    margin-left: 8px;
-                    padding: 4px 8px;
-                    background-color: #f8d7da;
-                    color: #721c24;
-                    border: 1px solid #f5c6cb;
-                    border-radius: 4px;
-                    font-size: 12px;
-                    font-weight: normal;
-                    display: inline-block;
-                    max-width: 300px;
-                    word-wrap: break-word;
                 `;
 
                 // Join multiple warnings with " | "

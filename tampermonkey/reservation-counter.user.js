@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         Reservation Counter
-// @namespace    http://tampermonkey.net/
-// @version      1.3
+// @namespace    https://github.com/laurenipsum/TTL
+// @version      1.4
 // @description  Count reservations (on each page)
 // @author       ipsum (with Claude.ai)
 // @match        https://tacomatoollibrary.myturn.com/library/orgInventory/listReservations*
 // @match        https://*.myturn.com/library/orgInventory/listReservations*
 // @grant        none
+// @license      MIT
 // ==/UserScript==
 
 (function() {
