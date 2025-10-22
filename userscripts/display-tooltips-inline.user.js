@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Display tooltips inline instead
 // @namespace    https://github.com/laurenipsum/TTL
-// @version      1.6
+// @version      1.6.1
 // @description  Replace hover tooltips with inline text display for item and user alerts
 // @author       laurenipsum
 // @match        https://tacomatoollibrary.myturn.com/library/orgInventory/listReservations*
