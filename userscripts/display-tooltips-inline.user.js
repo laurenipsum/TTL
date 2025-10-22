@@ -5,6 +5,7 @@
 // @description  Replace hover tooltips with inline text display for item and user alerts
 // @author       laurenipsum
 // @match        https://tacomatoollibrary.myturn.com/library/orgInventory/listReservations*
+// @match        https://tacomatoollibrary.myturn.com/library/inventory/*
 // @grant        none
 // @run-at       document-end
 // @license      MIT
