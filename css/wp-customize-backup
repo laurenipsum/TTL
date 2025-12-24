@@ -1,0 +1,76 @@
+/* Backing up my custom CSS created in the WP Customize interface, in case it gets nuked in a WP update or anything ... */ 
+
+/* Apply this class to any section/column where you want floating TOCs */
+.floating-toc-parent .elementor-widget-wrap {
+    display: block !important;
+}
+
+/* Style for the floating TOC itself */
+.floating-toc.elementor-widget-table-of-contents {
+    float: right !important;
+    width: 300px !important;
+    margin: 0 0 20px 20px !important;
+    clear: right !important;
+    background: #f9f9f9;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px; font-size: 14px; 
+}
+
+/* Ensure text can wrap around the floated element */
+.floating-toc-parent .elementor-text-editor {
+	overflow: visible !important; }
+
+/* change headers for readability on single-page blog posts */ 
+body.single-post h1 { font-weight: 900;}
+body.single-post h2 { font-weight: 800 !important; font-size: 1.8em !important; line-height: 1.15em; padding-bottom: 10px;}
+body.single-post h3 { letter-spacing: 0.5px !important; color: #2d592d !important; font-size: 1.4em !important; font-weight: 400; line-height: 2em;}
+body.single-post h4 { letter-spacing: .5px !important; color: #2d592d !important; font-size: 1.2em !important; font-weight: 500; line-height: 2em;}
+
+/*change fonts for non-headers */ 
+body.single-post p, body.single-post ul li, body.single-post ol li, body.single-post table { color: #333333 !important; font-size: 16px; }
+
+body.single-post table { font-size: 16px !important;}
+body.single-post table thead th { text-transform: capitalize !important; font-weight: bold; font-size: 18px; }
+
+/* underline links on single-page blog posts */
+body.single-post a { text-decoration: underline !important; }
+
+/* trying to make counters align correctly when the ToC wraps instead of truncating */ 
+.elementor-toc__list-item-text-wrapper {
+    display: flex;
+    align-items: flex-start;
+}
+
+.elementor-toc__list-item-text-wrapper::before {
+    content: counters(item,".") ". ";
+    flex-shrink: 0;
+    margin-right: 0.5em;
+}
+
+.elementor-toc--content-ellipsis .elementor-toc__list-item-text {
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
+    flex: 1;
+}
+
+/*caption for images on blog posts*/
+.caption { display:inline-block; font-style: italic; }
+
+/* styling tables on blog posts */
+table.blog { 
+	max-width: 75%; 
+	margin: 0 auto 20px 0;
+}
+
+table.blog th {
+	color: inherit; 
+	background-color: #e7e7e7; 
+	font-size: 1em; 
+	text-transform: none; 
+	border: 2px solid rgba(0, 0, 0, 0.08) !important; 
+}
+
+
+table.blog td { border: 2px solid rgba(0, 0, 0, 0.08) !important; }
