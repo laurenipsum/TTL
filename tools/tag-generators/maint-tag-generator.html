@@ -91,7 +91,8 @@
             }
             
             /* Style inputs to look like regular text when printing */
-            .current-location-input {
+            .current-location-input,
+            .created-date-input {
                 border: none !important;
                 background: transparent !important;
                 font-family: inherit !important;
@@ -100,6 +101,11 @@
                 padding: 0 !important;
                 margin: 0 !important;
                 width: auto !important;
+            }
+            
+            /* Hide the "today" buttons when printing */
+            button {
+                display: none !important;
             }
             
             /* Show blank line when input is empty */
@@ -428,6 +434,21 @@
             updateSelectionBadge();
         }
 
+        function setToday(button) {
+            // Find the input field that's next to this button
+            const input = button.previousElementSibling;
+            if (input && input.classList.contains('created-date-input')) {
+                const today = new Date();
+                const days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+                const dayName = days[today.getDay()];
+                const month = today.getMonth() + 1;
+                const day = today.getDate();
+                const year = today.getFullYear().toString().slice(-2);
+                
+                input.value = `${dayName} ${month}/${day}/${year}`;
+            }
+        }
+
         function processFiles() {
             const csvFileInput = document.getElementById('csvFile');
             const jsonTextArea = document.getElementById('jsonPaste');
@@ -719,9 +740,14 @@
                 <div class="tag-header">
                     <div class="tag-item-id">${item.itemId}: ${item.name}</div>
                     ${item.plan ? `<div class="tag-value">${item.plan}</div>` : ''}
-                    ${item.created && item.created.trim() ? `
-                        <div><span class="tag-label">Created: </span><span class="tag-value">${item.created}</span></div>
-                    ` : ''}
+                    <div class="tag-field">
+                        <span class="tag-label">Created: </span>
+                        ${item.created && item.created.trim() ? 
+                            `<span class="tag-value">${item.created}</span>` : 
+                            `<input type="text" class="created-date-input" placeholder="Enter date" style="border: 1px solid #ccc; padding: 2px; border-radius: 2px; font-size: 14px; width: 80px;">
+                             <button type="button" onclick="setToday(this)" style="margin-left: 4px; padding: 2px 6px; font-size: 12px; background: #007cba; color: white; border: none; border-radius: 2px; cursor: pointer;">today</button>`
+                        }
+                    </div>
                 </div>
                 
                 <div class="tag-content">
@@ -756,7 +782,6 @@
                     ${item.notes && item.notes.trim() ? `
                     <div class="tag-notes">    
                         <div class="tag-field">
-                            <div class="tag-label">Issue: </div>
                             <div class="tag-value">${item.notes}</div>
                         </div>
                     </div>` : ''}
