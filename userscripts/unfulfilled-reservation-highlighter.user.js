@@ -6,6 +6,7 @@
 // @author       ipsum (with Claude.ai)
 // @match        https://tacomatoollibrary.myturn.com/library/orgInventory/listReservations*
 // @match        https://*.myturn.com/library/orgInventory/listReservations*
+// @match        https://*.myturn.com/library/orgLoan/userHistory*
 // @grant        none
 // @license      MIT
 // ==/UserScript==
