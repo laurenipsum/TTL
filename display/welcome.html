@@ -2,7 +2,61 @@
 <html lang="en-US">
   <head>
     <style>
+      :root {
+        --color-accent: #e25822;
+        --color-body-text: #333333;
+        --color-body-bg: #ffffff; 
+        --font-family: "Open Sans", sans-serif;
+        --font-weight-base: 400;        
+        --font-size-base: 1rem;
+        --padding-base: 10px; 
+        --margin-base: 10px;      
+      }
       
+      body { 
+        display: grid;
+        color: var(--color-body-text);
+        background: var(--color-body-bg);
+        font-size: var(--font-size-base);
+        font-family: var(--font-family);
+      }
+
+      h1 {
+        color: var(--color-accent);
+        font-size: calc(var(--font-size-base) * 2);
+        font-weight: calc(var(--font-weight-base) + 300);
+      }
+
+      ol { list-style-type: none; }
+
+      header { 
+        grid-row: 1/1;
+        width: 100%;
+        border: 1px solid green;
+      }
+
+      section { 
+        width: 100%; 
+        border: 1px solid red; 
+        margin: var(--margin-base);
+        padding: var(--padding-base);
+        &.message { grid-row: 2/2; border: 3px solid pink; }
+        &.content { 
+          grid-row: 3/3; 
+          display: grid; 
+          grid-template-columns: repeat(3, 1fr);
+          border: 3px solid blue; 
+            & div#due-dates { grid-column: 1/1; border: 2px dotted purple; }
+            & div#next-open-day { grid-column: 2/2; border: 2px dotted green; }
+            & div#regular-hours { grid-column: 3/3; border: 2px dashed yellow;}
+          }
+        } 
+
+      footer { 
+        grid-row: 4/4; 
+        width: 100%;
+        border: 1px solid orange;
+      }
     </style>
     <script>
       
@@ -10,7 +64,36 @@
   </head>
 
   <body>
-    
+    <header>
+      <h1 id="welcome">Welcome to the [my org]! It is [date], [time].</h1>
+    </header>
+
+    <section class="message">
+      <div id="custom-message">Custom message, if any</div>
+      <div id="closing-countdown">Closing countdown, if any</div>
+    </section>
+
+    <section class="content">
+      <div id="due-dates">
+        <p>One week from today is: [date]</p>
+        <p>Two weeks from today is: [date]</p>
+      </div>
+      <div id="next-open-day">
+        <p>Our next open day and time is: [day], [time]</p>
+      </div>
+      <div id="regular-hours">
+        <p>Our regular hours are:</p>
+        <ol>
+          <li>Monday 4:30-7:30 PM</li>
+          <li>Wednesday 4:30-7:30 PM</li>
+          <li>Saturday 10:00 AM - 1:00 PM</li>
+        </ol>
+      </div>
+    </section>
+
+    <footer>
+      <div id="qr-codes">QR CODES GO HERE</div>
+    </footer>
     
   </body>
   
