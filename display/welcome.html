@@ -1,11 +1,16 @@
 <!doctype html>
 <html lang="en-US">
   <head>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
     <style>
       :root {
-        --color-accent: #e25822;
+        --color-brand: #425E26;
+        --color-accent-dark: #804E49; 
+        --color-accent-light: #7DB83C; 
         --color-body-text: #333333;
-        --color-body-bg: #ffffff; 
+        --color-body-bg: #f5f5f3; 
+        --color-card-bg: #ffffff; 
         --font-family: "Open Sans", sans-serif;
         --font-weight-base: 400;        
         --font-size-base: 1rem;
@@ -15,48 +20,66 @@
       
       body { 
         display: grid;
+        gap: 20px;
         color: var(--color-body-text);
         background: var(--color-body-bg);
         font-size: var(--font-size-base);
         font-family: var(--font-family);
-      }
-
-      h1 {
-        color: var(--color-accent);
-        font-size: calc(var(--font-size-base) * 2);
-        font-weight: calc(var(--font-weight-base) + 300);
+        margin: 0; 
+        padding: 0; 
+        line-height: 1.5rem;
       }
 
       ol { list-style-type: none; }
+      .card { background-color: var(--color-card-bg);}
 
       header { 
         grid-row: 1/1;
-        width: 100%;
-        border: 1px solid green;
+        width: 100%; 
+        padding: var(--padding-base); 
+        background: var(--color-brand);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        & h1 {
+          color: var(--color-body-bg);
+          font-size: calc(var(--font-size-base) * 2);
+          font-weight: calc(var(--font-weight-base) + 300);
+          line-height: 2.5rem;
+          & span { 
+            display: block; 
+          }
+        }
       }
 
       section { 
-        width: 100%; 
-        border: 1px solid red; 
-        margin: var(--margin-base);
-        padding: var(--padding-base);
-        &.message { grid-row: 2/2; border: 3px solid pink; }
-        &.content { 
+        width: auto; 
+        & div { padding: 0 var(--padding-base); }
+        &.message { 
+          grid-row: 2/2; 
+          &
+        }
+        &.content {
           grid-row: 3/3; 
-          display: grid; 
+          display: grid;
+          gap: 20px; 
           grid-template-columns: repeat(3, 1fr);
-          border: 3px solid blue; 
-            & div#due-dates { grid-column: 1/1; border: 2px dotted purple; }
-            & div#next-open-day { grid-column: 2/2; border: 2px dotted green; }
-            & div#regular-hours { grid-column: 3/3; border: 2px dashed yellow;}
+          & div#due-dates { 
+            grid-column: 1/1; 
+          }
+          & div#next-open-day { 
+            grid-column: 2/2;              
+          }
+          & div#regular-hours { 
+            grid-column: 3/3;
           }
         } 
-
+      }
       footer { 
         grid-row: 4/4; 
-        width: 100%;
-        border: 1px solid orange;
+        width: auto;
       }
+
     </style>
     <script>
       
@@ -64,31 +87,39 @@
   </head>
 
   <body>
-    <header>
-      <h1 id="welcome">Welcome to the [my org]! It is [date], [time].</h1>
-    </header>
 
+    <header>
+      <h1 id="welcome">
+        <span>Welcome to the [my org]</span>
+        <span>It is [date], [time]</span>
+      </h1>
+    </header>
+    
     <section class="message">
       <div id="custom-message">Custom message, if any</div>
       <div id="closing-countdown">Closing countdown, if any</div>
     </section>
 
     <section class="content">
-      <div id="due-dates">
+
+      <div id="due-dates" class="card">
         <p>One week from today is: [date]</p>
         <p>Two weeks from today is: [date]</p>
       </div>
-      <div id="next-open-day">
+
+      <div id="next-open-day" class="card">
         <p>Our next open day and time is: [day], [time]</p>
       </div>
-      <div id="regular-hours">
-        <p>Our regular hours are:</p>
+
+      <div id="regular-hours" class="card">
+        <h3>Tool lending hours</h3>
         <ol>
           <li>Monday 4:30-7:30 PM</li>
           <li>Wednesday 4:30-7:30 PM</li>
           <li>Saturday 10:00 AM - 1:00 PM</li>
         </ol>
       </div>
+
     </section>
 
     <footer>
