@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en-US">
   <head>
+    <title>Welcome to the Tacoma Tool Library</title>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -31,7 +32,7 @@
       }
 
       ol { list-style-type: none; }
-      .card { background-color: var(--color-card-bg);}
+      .card { background-color: var(--color-card-bg); }
 
       header { 
         grid-row: 1/1;
@@ -45,10 +46,8 @@
           color: var(--color-body-bg);
           font-size: calc(var(--font-size-base) * 2);
           font-weight: calc(var(--font-weight-base) + 300);
-          line-height: 2.5rem;
-          & span { 
-            display: block; 
-          }
+          line-height: 3.5rem;
+          text-align: center;
         }
       }
 
@@ -90,12 +89,12 @@
 
     <header>
       <h1 id="welcome">
-        <span>Welcome to the [my org]</span>
-        <span>It is [date], [time]</span>
+        Welcome to the Tacoma Tool Library!<br>
+        It is [date], [time]
       </h1>
     </header>
     
-    <section class="message">
+    <section class="message card">
       <div id="custom-message">Custom message, if any</div>
       <div id="closing-countdown">Closing countdown, if any</div>
     </section>
@@ -122,7 +121,7 @@
 
     </section>
 
-    <footer>
+    <footer class="card">
       <div id="qr-codes">QR CODES GO HERE</div>
     </footer>
     
