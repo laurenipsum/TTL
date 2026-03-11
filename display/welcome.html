@@ -80,9 +80,6 @@
       }
 
     </style>
-    <script>
-      
-    </script>
   </head>
 
   <body>
@@ -90,7 +87,10 @@
     <header>
       <h1 id="welcome">
         Welcome to the Tacoma Tool Library!<br>
-        It is [date], [time]
+        It is 
+          <span id="current-day"></span>, 
+          <span id="current-date"></span> <span id="current-month"></span>, 
+          <span id="current-hour"></span>:<span id="current-minutes"> </span>
       </h1>
     </header>
     
@@ -125,6 +125,41 @@
       <div id="qr-codes">QR CODES GO HERE</div>
     </footer>
     
+     <script>
+      // create 'now' and test it
+      const now = new Date(); 
+      console.log(now); 
+
+      //day and month arrays 
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+      //convert to 12h time
+      let hour; 
+      if (now.getHours() === 0)
+        { 
+          hour = 12;
+        } else if (now.getHours() < 13) { 
+          hour = now.getHours();
+        } else { 
+          hour = now.getHours() - 12; 
+        }
+
+      //minutes padding 
+      let minutes; 
+      if (now.getMinutes() < 10)
+        { minutes = '0' + now.getMinutes(); 
+        } else { 
+          minutes = now.getMinutes();
+        }
+
+      // get the current date 
+      document.getElementById('current-day').textContent = days[now.getDay()]; 
+      document.getElementById('current-date').textContent = now.getDate(); 
+      document.getElementById('current-month').textContent = months[now.getMonth()]; 
+      document.getElementById('current-hour').textContent = hour;
+      document.getElementById('current-minutes').textContent = minutes;
+    </script>
   </body>
   
 </html>
