@@ -1,22 +1,19 @@
-//1. on page load, check the current time
-//2. figure out what time is midnight tonight
-//3. subtract midnight’s milliseconds from right now’s milliseconds
-//4. set a timeout to that number of milliseconds
-//5. refresh the page when the countdown ends
+// create today
+const today = new Date();
+// and get the number of the day of the month
+const todayDay = today.getDate(); 
 
-function refreshAtMidnight() { 
-  // create 'now'
-  const now = new Date();
-
-  // figure out what day is tomorrow (will be 0:00:00 because I'm not specifying a time) 
-  const midnight = new Date(now.getFullYear(), now.getMonth(), (now.getDate() + 1)); 
-
-  // calculate time in milliseconds between now and midnight
-  const msUntilMidnight = midnight.getTime() - now.getTime();
-
-  // tell the page to reload when msUntilMidnight milliseconds have elapsed -- which should be tomorrow morning at midnight
-  setTimeout(location.reload, msUntilMidnight);
+function checkDateRollover() {
+  // get the date again and set it as a different const 
+  const irlDate = new Date(); 
+  // get the number of the day of the month from the new date
+  const irlDay = irlDate.getDate(); 
+  // check if they match
+  if (todayDay !== irlDay) { 
+    // if not, reload
+    location.reload(); 
+  } 
 }
 
-refreshAtMidnight(); 
-
+// run that function every hour
+setInterval(checkDateRollover, 3600000); 
