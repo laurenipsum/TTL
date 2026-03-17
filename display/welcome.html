@@ -79,6 +79,8 @@
       }
 
     </style>
+    <script src="js/utils.js"></script> 
+
   </head>
 
   <body>
@@ -104,8 +106,10 @@
         <p>Two weeks from today is: <span id="two-weeks"></span></p>
       </div>
 
-      <div id="next-open-day" class="card">
-        <p>Our next open day and time is: [day], [time]</p>
+      <div class="card">
+        <p>Our next open day and time is:</p>
+        <p id="next-open-day"></p>
+        <p id="next-open-time"></p>
       </div>
 
       <div id="regular-hours" class="card">
@@ -124,9 +128,9 @@
     </footer>
 
     <script src="js/refresh.js"></script>    
-    <script src="js/utils.js"></script> 
     <script src="js/date-time.js"></script>
     <script src="js/due-dates.js"></script>
+    <script src="js/next-open-day.js"></script>
   </body>
   
 </html>
