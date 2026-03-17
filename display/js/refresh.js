@@ -1,15 +1,13 @@
-// create today
-const today = new Date();
-// and get the number of the day of the month
+// get the number of the day of the month
 const todayDay = today.getDate(); 
 
 function checkDateRollover() {
   // get the date again and set it as a different const 
   const irlDate = new Date(); 
   // get the number of the day of the month from the new date
-  const irlDay = irlDate.getDate(); 
+  const irlDateDay = irlDate.getDate(); 
   // check if they match
-  if (todayDay !== irlDay) { 
+  if (todayDay !== irlDateDay) { 
     // if not, reload
     location.reload(); 
   } 
