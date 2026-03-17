@@ -1,6 +1,9 @@
+//create one day's worth of milliseconds
+const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24; 
+
 //day and month arrays 
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']; 
+const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']; 
 
 //create suffixes for ordinal numbers on dates
   function getSuffix(date) { 
@@ -16,3 +19,13 @@ const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 
     } else suffix = "th"; // the rest are 'th'
     return suffix; 
   }
+
+// create today 
+const today = new Date(); 
+
+//open days arrays 
+const openDays = [1, 3, 6];
+
+// we are open on Mon, Wed, and Sat, so here's an array that specifies the next open day based on the current day, when Sunday = 0 
+const daysUntilOpen = [1, 2, 3, 3, 2, 1, 2]; 
+
