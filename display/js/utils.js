@@ -29,3 +29,9 @@ const openDays = [1, 3, 6];
 // we are open on Mon, Wed, and Sat, so here's an array that specifies the next open day based on the current day, when Sunday = 0 
 const daysUntilOpen = [1, 2, 3, 3, 2, 1, 2]; 
 
+//closing time nested objects 
+const closingTimes = {
+  1: { hour: 19, minute: 30 },
+  3: { hour: 19, minute: 30 }, 
+  6: { hour: 17, minute: 0 }
+ }; 
