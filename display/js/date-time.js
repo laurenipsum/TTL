@@ -4,7 +4,7 @@
         // create 'now'
         const now = new Date();
 
-        //convert to 12h time
+        //convert it to 12h time
         let hour; 
         if (now.getHours() === 0) 
           { 
@@ -37,5 +37,5 @@
         document.getElementById('current-time').textContent = hour + ":" + minutes + " " + ampm;
       }
 
-      updateDateTime()
+      updateDateTime();
       setInterval(updateDateTime, 10000);
