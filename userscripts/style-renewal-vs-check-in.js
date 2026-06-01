@@ -1,5 +1,3 @@
-<script type="text/javascript">
-
 function applyCheckinClass(row) {
   if (row && !row.classList.contains('ttl-renewing')) {
     row.classList.add('ttl-checkin');
@@ -75,4 +73,3 @@ document.addEventListener('click', (e) => {
     if (row) row.classList.remove('ttl-renewing');
   }
 });
-</script>
