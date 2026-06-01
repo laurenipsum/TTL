@@ -1,12 +1,7 @@
-// Watch for changes to the page (buttons are loaded via Ajax after page load)
-const observer = new MutationObserver(() => {
-  // Get all .renew-btn elements that haven't been renamed yet
-  document.querySelectorAll('.renew-btn:not([data-renamed])').forEach((button) => {
-    // Rename the button and mark it so we don't process it again
-    button.textContent = 'Renew';
-    button.dataset.renamed = true;
-  });
-});
+//get all the .renew-btn elements
+const renewButtons = document.querySelectorAll('.renew-btn'); 
 
-// Start watching the whole page for DOM changes
-observer.observe(document.body, { childList: true, subtree: true });
+//for each thing returned by renewButtons, call it 'button' and do a thing do it
+renewButtons.forEach((button) => {
+  button.textContent = "Renew"; 
+});
