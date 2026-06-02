@@ -1,12 +1,15 @@
+// Helper function: add the check-in class to a row, but only if it's not already marked as a renewal
 function applyCheckinClass(row) {
   if (row && !row.classList.contains('ttl-renewing')) {
     row.classList.add('ttl-checkin');
   }
 }
 
-const observer = new MutationObserver(() => {
+// Watch for changes to the page (rows are loaded via Ajax after page load)
+const renewalObserver = new MutationObserver(() => {
+  // Find all checkboxes in the check-in table
   document.querySelectorAll('.select-item').forEach(checkbox => {
-    console.log('found checkbox, checked:', checkbox.checked, 'row:', checkbox.closest('.incoming-item'));
+    // If the checkbox is already checked, mark the row as a check-in
     if (checkbox.checked) {
       const row = checkbox.closest('.incoming-item');
       applyCheckinClass(row);
@@ -14,9 +17,12 @@ const observer = new MutationObserver(() => {
   });
 });
 
-observer.observe(document.body, { childList: true, subtree: true });
+// Start watching the whole page for DOM changes
+renewalObserver.observe(document.body, { childList: true, subtree: true });
 
+// Watch for checkbox changes
 document.addEventListener('change', (e) => {
+  // If a check-in checkbox was toggled, update the row class accordingly
   const checkbox = e.target.closest('.select-item');
   if (checkbox) {
     const row = checkbox.closest('.incoming-item');
@@ -29,7 +35,9 @@ document.addEventListener('change', (e) => {
   }
 });
 
+// Watch for button clicks
 document.addEventListener('click', (e) => {
+
   // Mark single row as renewal, clear check-in
   const renewBtn = e.target.closest('.renew-btn');
   if (renewBtn) {
@@ -66,10 +74,11 @@ document.addEventListener('click', (e) => {
     return;
   }
 
-  // Unmark renewal if removed from checkout
+  // Unmark renewal if the item is removed from the checkout section
   const removeBtn = e.target.closest('.remove-item');
   if (removeBtn) {
     const row = document.getElementById(`incoming-item-${removeBtn.dataset.id}`);
     if (row) row.classList.remove('ttl-renewing');
   }
+
 });
