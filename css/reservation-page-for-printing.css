@@ -19,7 +19,7 @@ a[href^="mailto:"] { display: none; }
     font-weight: bold;
 }
 
-/* style the inline user alert message */
+/* style the inline user alert message that's created by the script */
 .inline-warning {
     padding: 4px 8px;
     background: white;
@@ -51,8 +51,8 @@ div.reservation-notes { font-size: 20px !important; }
     h3.page-title, div.portlet-title { display: none; }
 
     /* hide reservation number */
-    .col-sm-5 { font-size: 0 !important; }
-    div .panel-heading, .col-sm-5 * { font-size: 30px !important; }
+    .col-sm-5 { font-size: 0 !important; } /* make text in that column 0 */ 
+    div .panel-heading, .col-sm-5 * { font-size: 30px !important; } /* but then give all that column's children a text size back again */ 
 
     /* hide button rows */
     div.panel-body > div:nth-child(1) > div.col-sm-7.col-sm-push-5.text-right.margin-bottom-10 { display: none; }
@@ -103,3 +103,50 @@ div.reservation-notes { font-size: 20px !important; }
     .badge-danger, .reservation-alert, .reservation-alert i {
         font-size: 2rem !important;
         background: #F3565D !important;
+        font-weight: bold;
+        color: white;
+        padding: 3px 10px;
+        height: 3rem;
+    }
+
+    /* style the inline user alert message for print */
+    .inline-warning {
+        padding: 4px 8px;
+        color: #F3565D !important;
+        font-weight: normal;
+        display: inline-block !important;
+        font-size: 20px !important;
+        max-width: 500px;
+    }
+
+    /* hide the email icon */
+    i.fa-envelope { display: none !important; }
+
+    /* remove color on borders */
+    .panel.reservation, .panel.success, div.panel-heading { border-color: #ddd !important; }
+
+    /* make alert text show up when printing */
+    .badge-danger::after {
+        content: attr(data-original-title);
+        display: inline-block;
+        margin: 8px;
+        color: #F3565D !important;
+        padding: 2px;
+        border-radius: 3px;
+        font-size: 25px !important;
+        font-weight: bold;
+    }
+
+    /* style unfulfilled reservation date for print */
+    .unfulfilled-reservation-date {
+        display: block;
+    }
+
+    /* style pickup days missed for print */
+    .pickup-days-missed {
+        display: block;
+        color: #F3565D !important;
+        font-size: 1.5rem !important;
+    }
+
+} /* end print styles */
