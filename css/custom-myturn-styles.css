@@ -4,7 +4,7 @@
 span .badge { display: none; }
 
 /* hide the mailto envelope icons */
-i.fa-envelope { display: none; } 
+a:has(i.fa-envelope) { display: none !important; } 
 
 /* make the alert text for problem items show up on the page */
 .badge-danger::after {
