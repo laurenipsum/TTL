@@ -170,10 +170,4 @@ tr.ttl-checkin td:first-of-type::before {
     display: block;
   }
 
-/** Date picker stuff **/ 
-/** see the generic custom-myturn-styles.css file for date picker styles that apply to public side -- this is an admin-only override **/
-/* On the admin date picker, make Sunday, Tuesday, Thursday, and Friday look different than open days */
-.datepicker td.day:nth-child(1), .datepicker td.day:nth-child(3), .datepicker td.day:nth-child(5), .datepicker td.day:nth-child(6) { font-weight:  normal !important; color: #777 !important; }
-
-
 
