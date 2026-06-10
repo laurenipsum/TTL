@@ -1,7 +1,8 @@
 /** Date picker stuff **/ 
 /* make the selectable days green and bold */ 
 td.day:not(.disabled) {font-weight: bold !important; color: #7db93c !important; }
-
+/* On the admin date picker, make Sunday, Tuesday, Thursday, and Friday look different than open days */
+.datepicker td.day:nth-child(1), .datepicker td.day:nth-child(3), .datepicker td.day:nth-child(5), .datepicker td.day:nth-child(6) { font-weight:  normal !important; color: #777 !important; }
 /* now put back the active styles once dates have been selected */ 
 .datepicker table tr td.active.active, .datepicker table tr td.active.highlighted.active, .datepicker table tr td.active.highlighted:active, .datepicker table tr td.active:active .datepicker table tr td.range-end
 { color: #fff !important; background-color: #286090 !important; border-color: #204d74 !important; }
