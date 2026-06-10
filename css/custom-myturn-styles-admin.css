@@ -41,6 +41,8 @@ a:has(i.fa-envelope) { display: none !important; }
 
 /* .hidden-xs, .hidden-sm, .hidden-md { display: none; } why did i have this? */
 
+.tabbable-line {display: block !important; }
+
 /* make reservation notes bigger */
 div.reservation-notes { font-size: 20px !important; }
 
