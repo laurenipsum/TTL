@@ -150,3 +150,11 @@ div.reservation-notes { font-size: 20px !important; }
     }
 
 } /* end print styles */
+
+/** Date picker stuff **/ 
+/* make the selectable days green and bold */ 
+td.day:not(.disabled) {font-weight: bold !important; color: #7db93c !important; }
+/* On the admin date picker, make Sunday, Tuesday, Thursday, and Friday look different than open days */
+.datepicker td.day:nth-child(1), .datepicker td.day:nth-child(3), .datepicker td.day:nth-child(5), .datepicker td.day:nth-child(6) { font-weight:  normal !important; color: #777 !important; }
+
+
