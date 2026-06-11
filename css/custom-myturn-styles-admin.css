@@ -5,6 +5,8 @@ span .badge { display: none; }
 
 /* hide the mailto envelope icons */
 a:has(i.fa-envelope) { display: none !important; } 
+/* except where I need them */ 
+a.prepare-message:has(i.fa-envelope) { display: block !important; }
 
 /* make the alert text for problem items show up on the page */
 .badge-danger::after {
