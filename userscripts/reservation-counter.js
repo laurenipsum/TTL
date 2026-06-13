@@ -69,6 +69,9 @@
                 <div style="font-weight: bold;">
                     ${counts.reservations} reservations
                 </div>
+                <div style="font-weight: bold;">
+                    Don't forget to print the second page of reservations!
+                </div>
                 <div style="font-size: 11px;">
                     (${counts.totalQuantity} total items)
                 </div>
