@@ -1,15 +1,14 @@
 (function() {
     'use strict';
-
+    // Check if this is the reservations page before running anything else
+    if (!window.location.pathname.includes('/orgInventory/listReservations')) return;
     function countItems() {
         // Count individual reservation items
         const itemRows = document.querySelectorAll('.panel.reservation table tbody tr');
         const individualItemCount = itemRows.length;
-
         // Get total from footer summaries (more accurate for quantities)
         const footerTotals = document.querySelectorAll('.panel.reservation table tfoot td strong');
         let totalQuantity = 0;
-
         footerTotals.forEach(footer => {
             const text = footer.textContent.trim();
             const number = parseInt(text);
@@ -17,39 +16,31 @@
                 totalQuantity += number;
             }
         });
-
         // Count number of reservations
         const reservations = document.querySelectorAll('.panel.reservation');
         const reservationCount = reservations.length;
-
         return {
             reservations: reservationCount,
             individualItems: individualItemCount,
             totalQuantity: totalQuantity
         };
     }
-
     function createCounterDisplay() {
         const counts = countItems();
-
         // Find the target row to insert our counter
         const targetRow = document.querySelector('.form-actions .row');
         if (!targetRow) return;
-
         // Create or update the display element
         let displayCol = document.getElementById('item-counter-col');
         if (!displayCol) {
             displayCol = document.createElement('div');
             displayCol.id = 'item-counter-col';
             displayCol.className = 'col-sm-2';
-
             const updateBtnCol = targetRow.querySelector('.col-sm-2');
             const col8 = targetRow.querySelector('.col-sm-8');
-
             if (col8) {
                 // Change the col-sm-8 to col-sm-6 to make room
                 col8.className = col8.className.replace('col-sm-8', 'col-sm-6');
-
                 // Insert our counter column
                 targetRow.insertBefore(displayCol, col8);
             } else {
@@ -57,6 +48,13 @@
                 targetRow.appendChild(displayCol);
             }
         }
+
+        // Only show the "print second page" reminder if there are exactly 25 reservations
+        const printReminderHTML = counts.reservations === 25 ? `
+            <div style="font-weight: bold;">
+                Don't forget to print the second page of reservations!
+            </div>
+        ` : '';
 
         displayCol.innerHTML = `
             <div style="
@@ -69,16 +67,13 @@
                 <div style="font-weight: bold;">
                     ${counts.reservations} reservations
                 </div>
-                <div style="font-weight: bold;">
-                    Don't forget to print the second page of reservations!
-                </div>
+                ${printReminderHTML}
                 <div style="font-size: 11px;">
                     (${counts.totalQuantity} total items)
                 </div>
             </div>
         `;
     }
-
     // Initialize when page loads
     function initialize() {
         // Wait a bit for the page to fully load
@@ -86,14 +81,12 @@
             createCounterDisplay();
         }, 1000);
     }
-
     // Run when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initialize);
     } else {
         initialize();
     }
-
     // Also watch for dynamic content changes (like filtering)
     const observer = new MutationObserver((mutations) => {
         let shouldUpdate = false;
@@ -104,15 +97,12 @@
                 shouldUpdate = true;
             }
         });
-
         if (shouldUpdate) {
             setTimeout(createCounterDisplay, 500);
         }
     });
-
     observer.observe(document.body, {
         childList: true,
         subtree: true
     });
-
 })();
