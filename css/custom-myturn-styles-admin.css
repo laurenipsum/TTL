@@ -43,6 +43,9 @@ a.prepare-message:has(i.fa-envelope) { display: block !important; }
 
 .tabbable-line {display: block !important; }
 
+/* highlight the selected radio button */
+div.col-sm-9 div.radio-list label:has(input:checked) { background-color: #ffff89 !important; }
+
 /* make reservation notes bigger */
 div.reservation-notes { font-size: 20px !important; }
 
