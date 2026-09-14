@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Clean up reservations list for printing tags
 // @namespace    https://github.com/laurenipsum/TTL
-// @version      1.1.2
+// @version      1.1.3
 // @description  Modify the TTL myTurn reservations list for display and for printing reservation tags
 // @author       ipsum
 // @match        https://tacomatoollibrary.myturn.com/library/orgInventory/listReservations*
