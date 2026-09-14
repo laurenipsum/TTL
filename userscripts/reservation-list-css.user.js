@@ -58,6 +58,9 @@
     css += "/* make reservation notes bigger */\n";
     css += "div.reservation-notes { font-size: 20px !important; }\n\n";
 
+    css += "/* highlight the selected radio button */\n";
+    css += "label:has(input:checked) { background-color: #ffff89 !important; }\n";
+
     css += "/* print stylesheet only */\n";
     css += "@media print {\n\n";
 
